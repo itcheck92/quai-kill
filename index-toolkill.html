@@ -1,0 +1,3827 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ So sánh Thống kê</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .upload-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .upload-box {
+            border: 1px solid #ddd;
+            padding: 10px;
+            flex: 1;
+            border-radius: 4px;
+        }
+
+        .upload-box h2 {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+        }
+
+        input[type="file"],
+        input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+            margin-right: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button.secondary {
+            background-color: #2196F3;
+        }
+
+        button.secondary:hover {
+            background-color: #0b7dda;
+        }
+
+        button.tertiary {
+            background-color: #ff9800;
+        }
+
+        button.tertiary:hover {
+            background-color: #e68a00;
+        }
+
+        button.quaternary {
+            background-color: #9c27b0;
+        }
+
+        button.quaternary:hover {
+            background-color: #7b1fa2;
+        }
+
+        table {
+            border-collapse: collapse;
+            /* width: 100%; */
+            /* Bỏ width để cột tự co giãn theo nội dung */
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px 10px; /* Tăng padding cho thoáng hơn, tương tự xem chi tiết */
+            text-align: left;
+            /* Căn lề trái cho tất cả các cột */
+            white-space: nowrap;
+            /* Ngăn không cho nội dung xuống dòng, giúp cột co giãn */
+        }
+
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+        }
+
+        /* Style cho header nhóm */
+        th[colspan] {
+            text-align: left;
+            /* Căn lề trái cho header nhóm */
+            padding-left: 10px;
+            /* Thêm khoảng đệm cho dễ nhìn */
+            border-bottom: 2px solid #ccc;
+            /* Đường kẻ dưới đậm hơn để phân tách cấp */
+            border-right: 2px solid #adadad;
+            /* Đường kẻ phải đậm hơn để phân tách các nhóm */
+            font-weight: bold;
+            color: #333;
+        }
+
+        th[colspan]:last-child {
+            border-right: 1px solid #ddd;
+            /* Giữ border cho cột cuối cùng của header */
+        }
+
+        /* Thêm đường viền đậm cho cột cuối của nhóm thông tin (Rank) */
+        .info-group-separator {
+            border-right: 2px solid #adadad;
+        }
+
+        /* Màu nền cho từng nhóm để phân biệt rõ ràng */
+        .group-might {
+            background-color: #eaf2f8;
+        }
+
+        .group-kills {
+            background-color: #e8f8f5;
+        }
+
+        .group-captured {
+            background-color: #fef5e7;
+        }
+
+        .group-destroyed {
+            background-color: #feebef;
+        }
+
+        .group-enemy-wounded {
+            background-color: #f4ecf7;
+        }
+
+        .group-troops-killed {
+            background-color: #d6eaf8;
+        }
+
+        .group-troops-lost {
+            background-color: #fdedec;
+        }
+
+        .group-troops-wounded {
+            background-color: #d7bde2;
+        }
+
+        .group-losses {
+            background-color: #fef9e7;
+        }
+
+        .group-attacks {
+            background-color: #e8f6f3;
+        }
+
+        .group-defenses {
+            background-color: #eaeded;
+        }
+
+        .group-victories {
+            background-color: #a9cce3;
+        }
+
+        .group-win-rate {
+            background-color: #a3e4d7;
+        }
+
+        .group-custom {
+            background-color: #eaeaea; /* Màu xám nhẹ cho các cột lạ (ví dụ: M) */
+        }
+
+        thead tr:last-child th {
+            white-space: nowrap;
+            background-color: #f8f9f9;
+            /* Màu nền riêng cho header phụ */
+        }
+
+        .positive {
+            color: green;
+            font-weight: bold;
+        }
+
+        .negative {
+            color: red;
+            font-weight: bold;
+        }
+
+        .neutral {
+            color: #666;
+        }
+
+        .no-data {
+            color: #999;
+            font-style: italic;
+        }
+
+        .controls {
+            margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .filter-section {
+            flex: 1;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .realtime-filter {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .realtime-filter input[type="checkbox"] {
+            margin: 0;
+        }
+
+        .status {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .success {
+            background-color: #e6ffe6;
+            color: #006600;
+        }
+
+        .error {
+            background-color: #ffebeb;
+            color: #cc0000;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .compact-col {
+            min-width: 70px;
+        }
+
+        .missing-data-row {
+            background-color: #f9f9f9;
+        }
+
+        .hidden-col {
+            display: none;
+        }
+
+        .priority-input {
+            margin-top: 10px;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .warning-box {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            display: none; /* Mặc định ẩn */
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .upload-box input[type="file"] {
+            margin-bottom: 10px;
+        }
+
+        .url-upload-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        .url-upload-group input[type="text"] {
+            flex-grow: 1;
+            width: auto;
+            /* Override width: 100% */
+        }
+
+        .file-name-display {
+            display: block;
+            margin-top: 5px;
+            font-style: italic;
+            color: #555;
+            font-size: 12px;
+            min-height: 1em;
+            /* Giữ khoảng trống */
+        }
+
+        /* === NEW STYLES FOR DETAILED VIEW === */
+        #detailedViewContainer {
+            margin-top: 20px;
+        }
+
+        .detailed-view-card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .detailed-view-body {
+            width: 100%;
+            overflow-x: auto;
+            /* Thêm thanh cuộn ngang khi cần */
+        }
+
+        .detailed-view-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .detailed-view-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .detailed-view-header .user-id {
+            font-size: 0.9em;
+            color: #666;
+            background-color: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .detailed-view-body table {
+            width: auto; /* Cho phép bảng co lại theo nội dung */
+            margin: 0 auto; /* Căn giữa bảng trong card */
+            border-collapse: collapse; /* Gộp viền */
+            border: 1px solid #e0e0e0; /* Thêm viền ngoài cho bảng */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Thêm bóng đổ nhẹ */
+        }
+
+        .detailed-view-body th,
+        .detailed-view-body td {
+            padding: 10px 12px; /* Tăng nhẹ padding cho thoáng hơn */
+            border-bottom: 1px solid #eee;
+            border-left: 1px solid #eee; /* Thêm viền trái */
+        }
+
+        .detailed-view-body th:first-child,
+        .detailed-view-body td:first-child {
+            border-left: none; /* Bỏ viền trái cho cột đầu tiên */
+        }
+
+        .detailed-view-body thead th {
+            background-color: #f7f7f7; /* Nền xám nhạt cho header */
+            font-weight: 600; /* Chữ đậm hơn */
+            color: #333;
+        }
+
+        .detailed-view-body tbody tr:nth-child(even) {
+            background-color: #fcfcfc; /* Thêm màu nền xen kẽ cho các hàng */
+        }
+
+        .detailed-view-body .stat-name {
+            text-align: left;
+            font-weight: bold;
+            color: #555;
+            white-space: nowrap; /* Đảm bảo tên chỉ số không bị xuống dòng */
+        }
+
+        /* === COMPACT VIEW STYLES === */
+        /* Hide entire groups not needed in compact view */
+        body.compact-view .group-captured,
+        body.compact-view .group-captured-cell,
+        body.compact-view .group-losses,
+        body.compact-view .group-losses-cell,
+        body.compact-view .group-attacks,
+        body.compact-view .group-attacks-cell,
+        body.compact-view .group-defenses,
+        body.compact-view .group-defenses-cell,
+        body.compact-view .group-victories,
+        body.compact-view .group-victories-cell,
+        body.compact-view .group-win-rate,
+        body.compact-view .group-win-rate-cell,
+        body.compact-view .id-col,
+        body.compact-view .rank-col {
+            /* Ẩn cột ID và Rank */
+            display: none;
+        }
+
+        /* In compact view, hide the month columns for the remaining groups */
+        body.compact-view .month-col {
+            display: none;
+        }
+
+        /* In compact view, change the main header text alignment to center since it only has one sub-column */
+        body.compact-view th[colspan] {
+            text-align: center;
+            padding-left: 3px;
+            /* Reset
+             padding */
+        }
+
+        .total-row {
+            font-weight: bold;
+            background-color: #f9f9f9;
+            text-align: right;
+        }
+
+        body.compact-view .group-troops-killed,
+        body.compact-view .group-troops-killed-cell {
+            display: none;
+        }
+
+        #updateDataModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+        }
+
+        #updateDataModal>div {
+            background: white;
+            margin: 50px auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #updateDataModal h2 {
+            margin-top: 0;
+        }
+
+        #updateDataModal table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        #updateDataModal th,
+        #updateDataModal td {
+            border: 1px solid #ddd;
+            padding: 5px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        #updateDataModal th {
+            background-color: #f2f2f2;
+        }
+
+        #updateDataModal>div {
+            max-height: 90vh;
+            /* Giới hạn chiều cao modal tối đa là 90% chiều cao màn hình */
+            overflow-y: auto;
+            /* Thêm thanh cuộn dọc nếu nội dung vượt quá chiều cao */
+        }
+
+        #updateDataTableContainer {
+            max-height: 60vh;
+            /* Giới hạn chiều cao bảng */
+            overflow-y: auto;
+            /* Thêm thanh cuộn dọc */
+            border: 1px solid #ddd;
+            /* Thêm viền */
+            padding: 10px;
+            /* Thêm khoảng cách bên trong */
+            background-color: #f9f9f9;
+            /* Màu nền nhẹ */
+            position: relative;
+            /* Đảm bảo sticky hoạt động trên Safari */
+        }
+
+        th,
+        td {
+            white-space: nowrap;
+            overflow-wrap: break-word;
+            /* Đảm bảo nội dung không bị tràn */
+        }
+
+        #updateDataModal table thead th {
+            position: sticky;
+            top: 0;
+            background-color: #ce8686;
+            /* Màu nền cho tiêu đề */
+            z-index: 1;
+        }
+
+        .upload-section {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .upload-box {
+            margin-right: 10px;
+            /* Thay thế gap */
+        }
+
+        /* Styles for Chart Modal */
+        #chartModal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+
+        #chartModal>div {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 700px;
+            border-radius: 8px;
+        }
+
+        #chartModal .chart-controls {
+            margin-bottom: 15px;
+        }
+
+        #chartModal .chart-controls select {
+            padding: 5px;
+        }
+
+        /* --- Watermark Style --- */
+        /* Watermark is now positioned relative to #tableWrapper */
+
+        #watermark {
+            position: absolute;
+            top: 50%;
+            /* Căn giữa theo chiều dọc */
+            left: 50%;
+            /* Căn giữa theo chiều ngang */
+            transform: translate(-50%, -50%) rotate(90deg);
+            /* Xoay 90 độ */
+            color: rgb(72 70 70 / 10%);
+            /* Màu xám rất nhạt để không che nội dung */
+            font-weight: bold;
+            pointer-events: none;
+            /* Không cho phép click vào chữ */
+            z-index: 100;
+            /* Đảm bảo chữ nằm trên nền bảng nhưng dưới các modal */
+            white-space: nowrap;
+            /* Ngăn chữ bị xuống dòng khi xoay */
+        }
+
+        /* --- Sortable Header Styles --- */
+        .sortable {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .sortable .sort-icon {
+            opacity: 0.3;
+            margin-left: 5px;
+        }
+
+        .sortable.sorted .sort-icon {
+            opacity: 1;
+        }
+
+        .toggle-id {
+            cursor: pointer;
+            user-select: none; /* Ngăn người dùng vô tình bôi đen dấu *** */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Công cụ So sánh Thống kê</h1>
+
+        <div class="upload-section">
+            <div class="upload-box">
+                <h2 id="monthTitleJune">Dữ liệu Tháng 6</h2>
+                <label for="juneMonthSelect">Chọn tháng:</label>
+                <select id="juneMonthSelect" onchange="updateMonth('june')">
+                    <option value="1">Tháng 1</option>
+                    <option value="2">Tháng 2</option>
+                    <option value="3">Tháng 3</option>
+                    <option value="4">Tháng 4</option>
+                    <option value="5">Tháng 5</option>
+                    <option value="6" selected>Tháng 6</option>
+                    <option value="7">Tháng 7</option>
+                    <option value="8">Tháng 8</option>
+                    <option value="9">Tháng 9</option>
+                    <option value="10">Tháng 10</option>
+                    <option value="11">Tháng 11</option>
+                    <option value="12">Tháng 12</option>
+                </select>
+                <label for="juneFile">1. Tải từ máy (ưu tiên):</label>
+                <input type="file" id="juneFile" accept=".xlsx,.xls" />
+                <span class="file-name-display" id="juneFileName"></span>
+                <label for="juneUrl" style="margin-top:10px; display:block;">2. Hoặc dán URL vào đây:</label>
+                <input type="text" id="juneUrl" placeholder="Dán link Google Sheets/GitHub Raw cho Tháng 6...">
+                <label for="juneImage" style="margin-top:10px; display:block;">3. Hoặc tải ảnh chụp màn hình:</label>
+                <input type="file" id="juneImage" accept="image/*" onchange="handleImageUpload(event, 'june')" />
+                <button onclick="loadData('june')" class="secondary" style="width: 100%; margin-top: 10px;">Tải Dữ Liệu
+                    Tháng 6</button>
+                <button onclick="showGitHubFiles('june')" class="secondary" style="width: 100%; margin-top: 10px;">Chọn
+                    tệp từ GitHub</button>
+                <div id="githubFilesJune" style="display: none; margin-top: 10px;">
+                    <label for="githubFileSelectJune">Chọn file:</label>
+                    <select id="githubFileSelectJune" onchange="selectGitHubFile('june')">
+                        <option value="">-- Chọn file --</option>
+                    </select>
+                </div>
+                <div id="juneStatus" class="status"></div>
+            </div>
+
+            <div class="upload-box">
+                <h2 id="monthTitleJuly">Dữ liệu Tháng 7</h2>
+                <label for="julyMonthSelect">Chọn tháng:</label>
+                <select id="julyMonthSelect" onchange="updateMonth('july')">
+                    <option value="1">Tháng 1</option>
+                    <option value="2">Tháng 2</option>
+                    <option value="3">Tháng 3</option>
+                    <option value="4">Tháng 4</option>
+                    <option value="5">Tháng 5</option>
+                    <option value="6">Tháng 6</option>
+                    <option value="7" selected>Tháng 7</option>
+                    <option value="8">Tháng 8</option>
+                    <option value="9">Tháng 9</option>
+                    <option value="10">Tháng 10</option>
+                    <option value="11">Tháng 11</option>
+                    <option value="12">Tháng 12</option>
+                </select>
+                <label for="julyFile">1. Tải từ máy (ưu tiên):</label>
+                <input type="file" id="julyFile" accept=".xlsx,.xls" />
+                <span class="file-name-display" id="julyFileName"></span>
+                <label for="julyUrl" style="margin-top:10px; display:block;">2. Hoặc dán URL vào đây:</label>
+                <input type="text" id="julyUrl" placeholder="Dán link Google Sheets/GitHub Raw cho Tháng 7...">
+                <label for="julyImage" style="margin-top:10px; display:block;">3. Hoặc tải ảnh chụp màn hình:</label>
+                <input type="file" id="julyImage" accept="image/*" onchange="handleImageUpload(event, 'july')" />
+                <button onclick="loadData('july')" class="secondary" style="width: 100%; margin-top: 10px;">Tải Dữ Liệu
+                    Tháng 7</button>
+                <button onclick="showGitHubFiles('july')" class="secondary" style="width: 100%; margin-top: 10px;">Chọn
+                    tệp từ GitHub</button>
+                <div id="githubFilesJuly" style="display: none; margin-top: 10px;">
+                    <label for="githubFileSelectJuly">Chọn file:</label>
+                    <select id="githubFileSelectJuly" onchange="selectGitHubFile('july')">
+                        <option value="">-- Chọn file --</option>
+                    </select>
+                </div>
+                <div id="julyStatus" class="status"></div>
+            </div>
+        </div>
+
+        <div id="ocrLimitInfo" style="text-align: center; font-size: 12px; color: #555; margin-bottom: 10px;"></div>
+
+        <div id="columnWarning" class="warning-box"></div>
+
+        <div class="controls">
+            <div style="flex: 1;">
+                <input type="text" id="searchInput" placeholder="Tìm theo tên hoặc ID..." />
+                <div style="display: flex; gap: 5px; margin-top: 5px;">
+                    <button onclick="searchTable()">Tìm kiếm</button>
+                    <button onclick="showDetailedView()" class="secondary">Xem chi tiết</button>
+                    <button id="compactViewBtn" onclick="toggleCompactView()" class="tertiary">Tinh gọn</button>
+                    <button onclick="toggleIdColumn()" class="tertiary">Ẩn/Hiện ID</button>
+                    <button id="exportPngBtn" onclick="exportToPNGByRange()" class="tertiary">Xuất ảnh theo phạm
+                        vi</button>
+                    <button onclick="exportToExcel()" class="quaternary">Xuất Excel (Đầy đủ)</button>
+                    <button onclick="exportToCompactExcel()" class="quaternary">Xuất Excel (Tinh gọn)</button>
+                    <button onclick="resetTable()">Đặt lại</button>
+                    <button id="updateDataBtn" onclick="showUpdateDataModal()" class="secondary">Cập nhật dữ
+                        liệu</button>
+                    <button onclick="showChartModal()" class="secondary">Hiển thị Biểu đồ</button>
+                    <button onclick="showOverallComparisonChart()" class="secondary">Biểu đồ so sánh</button>
+                </div>
+            </div>
+        </div>
+        <div id="totalsContainer"
+            style="margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: #f9f9f9; display: none;">
+            <h3 style="margin: 0 0 10px 0; font-size: 14px; color: #333;">Tổng Thống Kê</h3>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                    <div><strong>Tổng Kills:</strong> <span id="totalKills">0</span></div>
+                    <div><strong>Tổng Số Quân Tổn Thất:</strong> <span id="totalTroopsLost">0</span></div>
+                    <div><strong>Tổng Kẻ Thù Tiêu Diệt:</strong> <span id="totalEnemiesDestroyed">0</span></div>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                    <div><strong>Tổng Quân Địch Bị Thương:</strong> <span id="totalEnemyWounded">0</span></div>
+                    <div><strong>Tổng Quân Đội Bị Thương:</strong> <span id="totalTroopsWounded">0</span></div>
+                </div>
+            </div>
+        </div>
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Đang xử lý...</p>
+        </div>
+
+        <div id="tableContainer">
+            <div id="tableWrapper" style="position: relative; display: inline-block;">
+                <!-- Wrapper to contain table and watermark -->
+                <div id="watermark"></div>
+                <table id="comparisonTable">
+                    <thead>
+                        <!-- Header sẽ được tạo động bởi Javascript -->
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Dữ liệu sẽ được thêm vào đây -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Container for the new comparison view -->
+
+
+        <!-- Container for the new detailed vertical view -->
+        <div id="detailedViewContainer" style="display: none;"></div>
+        <div id="updateDataModal"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999;">
+            <div
+                style="background: white; margin: 50px auto; padding: 20px; width: 80%; max-width: 800px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                <h2 style="margin-top: 0;">Cập nhật dữ liệu</h2>
+                <button onclick="showGitHubFilesForUpdate()" class="secondary">Chọn tệp từ GitHub</button>
+                <div id="githubFilesUpdate" style="display: none; margin-top: 10px;">
+                    <label for="githubFileSelectUpdate">Chọn file:</label>
+                    <select id="githubFileSelectUpdate" onchange="loadGitHubFileForUpdate()">
+                        <option value="">-- Chọn file --</option>
+                    </select>
+                </div>
+                <div id="updateDataTableContainer"
+                    style="margin-top: 20px; overflow-x: auto; border: 1px solid #ddd; padding: 10px; background-color: #f9f9f9;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tên</th>
+                                <th>User ID</th>
+                                <th>Rank</th>
+                                <th>Might</th>
+                                <th>Kills</th>
+                                <th>Kẻ Thù Bị Bắt</th>
+                                <th>Kẻ Thù Tiêu Diệt</th>
+                                <th>Quân Địch Bị Thương</th>
+                                <th>Quân Đội Đã Giết</th>
+                                <th>Số Quân Tổn Thất</th>
+                                <th>Quân Đội Bị Thương</th>
+                                <th>Thua</th>
+                                <th>Tấn công Thành công</th>
+                                <th>Phòng thủ Thành công</th>
+                                <th>Chiến Thắng</th>
+                                <th>Tỉ Lệ Chiến Thắng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dữ liệu sẽ được thêm vào đây -->
+                        </tbody>
+                    </table>
+                </div>
+                <button onclick="addNewRow()" class="secondary" style="margin-top: 10px;">Thêm Dữ Liệu Mới</button>
+                <button onclick="saveUpdatedData()" class="secondary" style="margin-top: 10px;">Lưu thay đổi</button>
+                <button onclick="closeUpdateDataModal()" class="tertiary" style="float: right;">Đóng</button>
+            </div>
+        </div>
+        <!-- Chart Modal -->
+        <div id="chartModal">
+            <div>
+                <h2 style="margin-top: 0;">Biểu đồ Biến động Chỉ số</h2>
+                <div class="chart-controls">
+                    <label for="playerSelectChart">Chọn người chơi:</label>
+                    <select id="playerSelectChart" onchange="updateChart()"></select>
+
+                    <label for="playerCompareChart">Người chơi 2 (so sánh):</label>
+                    <select id="playerCompareChart" onchange="updateChart()"></select>
+                </div>
+                <div style="position: relative; height:60vh; width:100%">
+                    <canvas id="statsChart"></canvas>
+                </div>
+                <button onclick="hideChartModal()" class="tertiary"
+                    style="float: right; margin-top: 15px;">Đóng</button>
+            </div>
+        </div>
+        <!-- Overall Comparison Chart Modal -->
+        <div id="overallComparisonChartModal"
+            style="display: none; position: fixed; z-index: 10001; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6);">
+            <div
+                style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 1200px; border-radius: 8px;">
+                <h2 style="margin-top: 0;">Biểu đồ So sánh Tổng quan Người chơi</h2>
+                <button id="toggleOverallChartBtn" class="secondary">Chuyển đổi dữ liệu</button>
+                <div id="overallChartContainer" style="position: relative; height: 80vh; overflow-y: auto;">
+                    <!-- Biểu đồ sẽ được render ở đây -->
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                    <button onclick="hideOverallComparisonChart()" class="tertiary">Đóng</button>
+                </div>
+            </div>
+        </div>
+        <!-- OCR Result Modal -->
+        <div id="ocrResultModal"
+            style="display: none; position: fixed; z-index: 10002; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6);">
+            <div
+                style="background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 600px; border-radius: 8px;">
+                <h2 style="margin-top: 0;">Kết quả nhận dạng từ ảnh</h2>
+                <p>Vui lòng kiểm tra lại các thông tin dưới đây trước khi thêm vào bảng so sánh.</p>
+                <div id="ocrResultContainer" style="max-height: 40vh; overflow-y: auto; margin-bottom: 20px;">
+                    <table id="ocrResultTable" style="width: 100%; font-size: 13px;">
+                        <!-- OCR data will be populated here -->
+                    </table>
+                </div>
+                <div id="ocrCopySection" style="display: none; margin-top: 15px;">
+                    <p style="font-weight: bold;">Dữ liệu đã gộp (sẵn sàng để sao chép vào Excel):</p>
+                    <textarea id="ocrCopyText" rows="4"
+                        style="width: 100%; font-family: monospace; font-size: 12px; resize: vertical;"></textarea>
+                    <p id="ocrMissingWarning" style="color: #d97706; font-size: 12px; display: none; margin-top: 5px;"></p>
+                    <button id="copyOcrTextBtn" class="secondary" style="margin-top: 5px;">Sao chép</button>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                    <div class="action-buttons">
+                        <button id="mergeOcrBtn" class="tertiary">Tải ảnh 2 & Gộp</button>
+                        <input type="file" id="secondOcrImageInput" accept="image/*" style="display: none;" />
+                        <button id="addOcrToJuneBtn" class="secondary">Thêm vào Tháng 6</button>
+                        <button id="addOcrToJulyBtn" class="secondary">Thêm vào Tháng 7</button>
+                    </div>
+                    <button onclick="hideOcrResultModal()" class="tertiary">Đóng</button>
+                </div>
+            </div>
+        </div>
+        <!-- Export Result Modal -->
+        <div id="exportResultModal" style="display: none; position: fixed; z-index: 10003; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8);">
+            <div style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 800px; border-radius: 8px; text-align: center;">
+                <h2 style="margin-top: 0;">Kết quả Xuất Ảnh</h2>
+                <p><strong>Lưu ý cho điện thoại (iOS/Android):</strong> Vui lòng <strong>nhấn giữ vào ảnh</strong> bên dưới để lưu vào máy.</p>
+                <div id="exportResultContainer" style="overflow-y: auto; max-height: 70vh; display: flex; flex-direction: column; gap: 20px; align-items: center;">
+                    <!-- Images will be appended here -->
+                </div>
+                <div style="margin-top: 20px;">
+                    <button onclick="closeExportResultModal()" class="tertiary">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Biến toàn cục
+        let juneData = {};
+        let julyData = {};
+        let chartInstance;
+        let tempOcrData = null; // Dữ liệu tạm thời từ OCR
+        let currentData = [];
+        let showIdColumn = true;
+        window.showMonthlyDataOverall = false; // Track whether to show monthly data or total diff
+        let currentSort = { column: 'name', direction: 'asc' };
+        let overallChartInstances = []; // Store chart instances for PDF export
+        let selectedMonths = {
+            june: 6, // Mặc định là tháng 6
+            july: 7  // Mặc định là tháng 7
+        };
+
+        // Hàm tính toán vị trí label cho biểu đồ, hỗ trợ cả biểu đồ ngang và dọc
+        // Trả về 'align' value ('start'/'end' cho ngang, 'top'/'bottom' cho dọc)
+        function getLabelAlign(context) {
+            const value = context.dataset.data[context.dataIndex];
+            if (value === null || value === undefined) return 'end';
+
+            const chart = context.chart;
+            const ctx = chart.ctx;
+            const chartArea = chart.chartArea;
+            const isHorizontal = chart.options.indexAxis === 'y';
+
+            const datalabelsOptions = chart.options.plugins.datalabels || {};
+            const fontOptions = datalabelsOptions.font || {};
+            const fontSize = fontOptions.size || Chart.defaults.font.size;
+            const fontWeight = fontOptions.weight || Chart.defaults.font.weight || 'normal';
+            const fontFamily = fontOptions.family || Chart.defaults.font.family;
+            const fontStyle = fontOptions.style || Chart.defaults.font.style || 'normal';
+            ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+            const offset = datalabelsOptions.offset || 4;
+
+            if (isHorizontal) {
+                // --- Logic cho Biểu đồ Ngang ---
+                const scale = chart.scales[context.dataset.xAxisID || 'x'];
+                const text = value.toLocaleString('vi-VN');
+                const textWidth = ctx.measureText(text).width;
+                const pixel = scale.getPixelForValue(value);
+
+                if (value >= 0) {
+                    if (pixel + offset + textWidth > chartArea.right) return 'start';
+                } else {
+                    if (pixel - offset - textWidth < chartArea.left) return 'start';
+                }
+                return 'end';
+            } else {
+                // --- Logic cho Biểu đồ Dọc ---
+                const scale = chart.scales[context.dataset.yAxisID || 'y'];
+                const textHeight = fontSize; // Dùng chiều cao font làm giá trị ước tính
+                const pixel = scale.getPixelForValue(value);
+
+                if (value >= 0) {
+                    if (pixel - offset - textHeight < chartArea.top) return 'bottom'; // 'bottom' căn lề vào trong
+                } else {
+                    if (pixel + offset + textHeight > chartArea.bottom) return 'top'; // 'top' căn lề vào trong
+                }
+                return value >= 0 ? 'top' : 'bottom'; // Mặc định: 'top' cho số dương, 'bottom' cho số âm
+            }
+        }
+
+        // Đăng ký plugin datalabels cho tất cả các biểu đồ
+        Chart.register(ChartDataLabels);
+
+        // Cấu hình mặc định cho các chỉ số chuẩn (để lấy màu sắc và tên đẹp)
+        const DEFAULT_STATS_CONFIG = [
+            { key: 'might', name: 'Might', groupClass: 'group-might', cellClass: 'group-might-cell' },
+            { key: 'kills', name: 'Kills', groupClass: 'group-kills', cellClass: 'group-kills-cell' },
+            { key: 'enemies_captured', name: 'Kẻ Thù Bị Bắt', groupClass: 'group-captured', cellClass: 'group-captured-cell' },
+            { key: 'enemies_destroyed', name: 'Kẻ Thù Tiêu Diệt', groupClass: 'group-destroyed', cellClass: 'group-destroyed-cell' },
+            { key: 'enemy_wounded', name: 'Quân Địch Bị Thương', groupClass: 'group-enemy-wounded', cellClass: 'group-enemy-wounded-cell' },
+            { key: 'troops_killed', name: 'Quân Đội Đã Giết', groupClass: 'group-troops-killed', cellClass: 'group-troops-killed-cell' },
+            { key: 'troops_lost', name: 'Số Quân Tổn Thất', groupClass: 'group-troops-lost', cellClass: 'group-troops-lost-cell' },
+            { key: 'troops_wounded', name: 'Quân Đội Bị Thương', groupClass: 'group-troops-wounded', cellClass: 'group-troops-wounded-cell' },
+            { key: 'losses', name: 'Thua', groupClass: 'group-losses', cellClass: 'group-losses-cell' },
+            { key: 'successful_attacks', name: 'Tấn công Thành công', groupClass: 'group-attacks', cellClass: 'group-attacks-cell' },
+            { key: 'successful_defenses', name: 'Phòng thủ Thành công', groupClass: 'group-defenses', cellClass: 'group-defenses-cell' },
+            { key: 'victories', name: 'Chiến Thắng', groupClass: 'group-victories', cellClass: 'group-victories-cell' }
+        ];
+        // Biến lưu cấu hình hiện tại (sẽ thay đổi dựa trên file Excel)
+        let activeStatsConfig = [...DEFAULT_STATS_CONFIG];
+
+        // Hàm định dạng số lớn (triệu, tỷ) cho các trục biểu đồ
+        const formatVietnameseTick = (value) => {
+            if (value === 0) return '0';
+            const absVal = Math.abs(value);
+            const sign = value < 0 ? '-' : '';
+            if (absVal >= 1e12) return sign + (absVal / 1e12).toFixed(2).replace(/\.00$|\.0$/, '') + ' nghìn tỷ';
+            if (absVal >= 1e9) return sign + (absVal / 1e9).toFixed(2).replace(/\.00$|\.0$/, '') + ' tỷ';
+            if (absVal >= 1e6) return sign + (absVal / 1e6).toFixed(2).replace(/\.00$|\.0$/, '') + ' triệu';
+            if (absVal >= 1e3) return sign + (absVal / 1e3).toFixed(0) + 'k';
+            return value.toLocaleString('vi-VN');
+        };
+
+        // Hàm tải dữ liệu với logic ưu tiên
+        function loadData(type) {
+            const fileInput = document.getElementById(`${type}File`);
+            const urlInput = document.getElementById(`${type}Url`);
+
+            // Ưu tiên 1: Kiểm tra file đã chọn
+            if (fileInput.files.length > 0) {
+                handleFileUpload(fileInput.files[0], type);
+            }
+            // Ưu tiên 2: Kiểm tra URL
+            else if (urlInput.value.trim() !== '') {
+                loadFromUrl(type);
+            }
+            // Không có nguồn dữ liệu
+            else {
+                alert(`Vui lòng chọn một file hoặc dán URL cho tháng ${type === 'june' ? '6' : '7'}.`);
+            }
+        }
+        // Hàm xử lý upload file
+        function handleFileUpload(file, type) {
+            const reader = new FileReader();
+            const statusElement = document.getElementById(`${type}Status`);
+
+            reader.onload = function (e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    if (type === 'june') {
+                        juneData = processData(jsonData).data;
+                        statusElement.textContent = `Đã tải tháng 6: ${Object.keys(juneData).length} người chơi.`;
+                        statusElement.className = 'status success';
+                    } else {
+                        julyData = processData(jsonData).data;
+                        statusElement.textContent = `Đã tải tháng 7: ${Object.keys(julyData).length} người chơi.`;
+                        statusElement.className = 'status success';
+                    }
+
+                    if (Object.keys(juneData).length > 0 && Object.keys(julyData).length > 0) {
+                        compareData();
+                    }
+                } catch (error) {
+                    statusElement.textContent = `Lỗi: ${error.message}`;
+                    statusElement.className = 'status error';
+                }
+            };
+
+            reader.onerror = function () {
+                statusElement.textContent = `Lỗi đọc file`;
+                statusElement.className = 'status error';
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Hàm tải từ URL, được lấy và chỉnh sửa từ file index.html
+        async function loadFromUrl(type) {
+            const urlInputId = `${type}Url`;
+            const statusElementId = `${type}Status`;
+            const urlInput = document.getElementById(urlInputId);
+            const statusElement = document.getElementById(statusElementId);
+
+            const rawUrl = urlInput.value.trim();
+            if (!rawUrl) {
+                alert(`Vui lòng nhập URL cho tháng ${type === 'june' ? '6' : '7'}!`);
+                return;
+            }
+
+            let exportUrl = '';
+            const googleSheetRegex = /(?:spreadsheets|file)\/d\/([a-zA-Z0-9-_]+)/;
+            const match = rawUrl.match(googleSheetRegex);
+
+            if (match && match[1]) {
+                const sheetId = match[1];
+                exportUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx`;
+            } else if (rawUrl.toLowerCase().endsWith('.xlsx') || rawUrl.toLowerCase().endsWith('.xls')) {
+                exportUrl = rawUrl;
+            } else {
+                alert("URL không hợp lệ. Vui lòng cung cấp link Google Sheets/File hợp lệ (đã chia sẻ công khai) hoặc link trực tiếp đến file .xlsx.");
+                return;
+            }
+
+            statusElement.textContent = 'Đang tải từ URL...';
+            statusElement.className = 'status';
+            const loading = showLoading(`Đang tải dữ liệu tháng ${type === 'june' ? '6' : '7'}...`);
+
+            try {
+                const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
+                const fetchUrl = proxyUrl + encodeURIComponent(exportUrl);
+
+                const response = await fetch(fetchUrl, { signal: AbortSignal.timeout(30000) });
+
+                if (!response.ok) {
+                    throw new Error(`Lỗi HTTP: ${response.status} ${response.statusText}`);
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !(contentType.includes('spreadsheetml.sheet') || contentType.includes('application/vnd.ms-excel') || contentType.includes('octet-stream'))) {
+                    const clonedResponse = response.clone();
+                    const responseText = await clonedResponse.text();
+                    if (responseText.trim().toLowerCase().startsWith('<html') || responseText.trim().toLowerCase().startsWith('<!doctype html')) {
+                        throw new Error("Lỗi định dạng: Nhận được HTML thay vì file Excel. Đảm bảo link được chia sẻ công khai.");
+                    }
+                }
+
+                const arrayBuffer = await response.arrayBuffer();
+                if (arrayBuffer.byteLength < 100) {
+                    throw new Error("Tải file thất bại: File nhận được quá nhỏ.");
+                }
+
+                const data = new Uint8Array(arrayBuffer);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+                const processed = processData(jsonData).data;
+                if (type === 'june') {
+                    juneData = processed;
+                    statusElement.textContent = `Đã tải tháng 6 từ URL: ${Object.keys(juneData).length} người chơi.`;
+                    statusElement.className = 'status success';
+                } else {
+                    julyData = processed;
+                    statusElement.textContent = `Đã tải tháng 7 từ URL: ${Object.keys(julyData).length} người chơi.`;
+                    statusElement.className = 'status success';
+                }
+
+                if (Object.keys(juneData).length > 0 && Object.keys(julyData).length > 0) {
+                    compareData();
+                }
+            } catch (error) {
+                console.error(`Lỗi khi tải URL cho ${type}:`, error);
+                statusElement.textContent = `Lỗi tải URL: ${error.message}`;
+                statusElement.className = 'status error';
+            } finally {
+                loading.remove();
+            }
+        }
+
+        // Hàm xử lý dữ liệu
+        function processData(sheetData) {
+            const data = {};
+            let headerRowIndex = -1;
+
+            for (let i = 0; i < sheetData.length; i++) {
+                const row = sheetData[i];
+                if (row && row.includes("User ID")) {
+                    headerRowIndex = i;
+                    break;
+                }
+            }
+
+            if (headerRowIndex === -1) throw new Error("Không tìm thấy hàng tiêu đề");
+
+            const headers = sheetData[headerRowIndex];
+            
+            // Bản đồ ánh xạ tên cột chuẩn (tiếng Anh/Việt) sang key chuẩn
+            const standardMapping = {
+                "name": "name", "tên": "name",
+                "user id": "userId", "id": "userId",
+                "rank": "rank", "thứ hạng": "rank",
+                "win rate": "win_rate", "tỉ lệ chiến thắng": "win_rate",
+                // Các chỉ số chuẩn
+                "might": "might", "sức mạnh": "might",
+                "kills": "kills", "tiêu diệt": "kills",
+                "enemies captured": "enemies_captured", "kẻ thù bị bắt": "enemies_captured",
+                "enemies destroyed might": "enemies_destroyed", "kẻ thù tiêu diệt": "enemies_destroyed",
+                "enemy troops wounded": "enemy_wounded", "quân địch bị thương": "enemy_wounded",
+                "troops killed": "troops_killed", "quân đội đã giết": "troops_killed",
+                "troops lost": "troops_lost", "số quân tổn thất": "troops_lost",
+                "troops wounded": "troops_wounded", "quân đội bị thương": "troops_wounded",
+                "losses": "losses", "thua": "losses",
+                "successful attacks": "successful_attacks", "tấn công thành công": "successful_attacks",
+                "successful defenses": "successful_defenses", "phòng thủ thành công": "successful_defenses",
+                "victories": "victories", "chiến thắng": "victories"
+            };
+
+            // Xác định index của các cột
+            const colMap = {}; // index -> key
+            const detectedMetrics = new Set(); // Lưu danh sách các key chỉ số tìm thấy
+
+            headers.forEach((header, index) => {
+                if (!header) return;
+                const lowerHeader = header.toString().trim().toLowerCase();
+                
+                // Bỏ qua cột STT
+                if (lowerHeader === 'stt' || lowerHeader === 'no') return;
+
+                if (standardMapping[lowerHeader]) {
+                    const key = standardMapping[lowerHeader];
+                    colMap[index] = key;
+                    // Nếu không phải là cột thông tin định danh, thì nó là chỉ số
+                    if (!['name', 'userId', 'rank', 'win_rate'].includes(key)) {
+                        detectedMetrics.add(key);
+                    }
+                } else {
+                    // Cột lạ (ví dụ: "M"), coi như là một chỉ số mới
+                    // Giữ nguyên tên gốc làm key (nhưng bỏ khoảng trắng để an toàn)
+                    const customKey = header.toString().trim();
+                    colMap[index] = customKey;
+                    detectedMetrics.add(customKey);
+                }
+            });
+
+            // Kiểm tra xem có tìm thấy cột ID không
+            const userIdIndex = Object.keys(colMap).find(idx => colMap[idx] === 'userId');
+
+            for (let i = headerRowIndex + 1; i < sheetData.length; i++) {
+                const row = sheetData[i];
+                if (!row || row.length === 0) continue;
+
+                const userId = row[userIdIndex];
+                if (!userId) continue;
+
+                const userObj = {
+                    name: 'Không xác định',
+                    rank: 'Không xác định',
+                    win_rate: '0%'
+                };
+
+                // Duyệt qua các cột đã map để lấy dữ liệu
+                for (const [colIdx, key] of Object.entries(colMap)) {
+                    let val = row[colIdx];
+                    
+                    if (key === 'name' || key === 'rank') {
+                        userObj[key] = val || 'Không xác định';
+                    } else if (key === 'win_rate') {
+                         if (val === undefined || val === null) val = '0%';
+                         if (typeof val === 'number') val = (val * 100).toFixed(2) + '%';
+                         let strVal = val.toString().replace(',', '.');
+                         if (!strVal.endsWith('%')) strVal += '%';
+                         userObj[key] = strVal;
+                    } else {
+                        // Xử lý các chỉ số (bao gồm cả cột lạ)
+                        if (val === undefined || val === null) val = 0;
+                        if (typeof val === 'string') {
+                            const num = parseFloat(val.replace(/[^0-9.-]/g, ''));
+                            val = isNaN(num) ? 0 : num;
+                        }
+                        userObj[key] = val;
+                    }
+                }
+                data[userId] = userObj;
+            }
+
+            return { data, detectedMetrics: Array.from(detectedMetrics) };
+        }
+
+
+        // Hàm so sánh dữ liệu
+        function compareData() {
+            const loadingElement = document.getElementById('loading');
+            loadingElement.style.display = 'block';
+
+            setTimeout(() => {
+                try {
+                    const allUserIds = new Set([...Object.keys(juneData), ...Object.keys(julyData)]);
+                    currentData = [];
+
+                    // 1. Xác định danh sách các cột cần hiển thị
+                    // Lấy tất cả các key có trong dữ liệu của cả 2 tháng (trừ các key định danh)
+                    const allKeys = new Set();
+                    const collectKeys = (dataObj) => {
+                        Object.values(dataObj).forEach(user => {
+                            Object.keys(user).forEach(k => {
+                                if (!['name', 'userId', 'rank', 'win_rate'].includes(k)) allKeys.add(k);
+                            });
+                        });
+                    };
+                    collectKeys(juneData);
+                    collectKeys(julyData);
+
+                    // 2. Xây dựng activeStatsConfig
+                    activeStatsConfig = [];
+                    const missingStandardKeys = [];
+
+                    // Kiểm tra các cột chuẩn
+                    DEFAULT_STATS_CONFIG.forEach(stat => {
+                        if (allKeys.has(stat.key)) {
+                            activeStatsConfig.push(stat);
+                            allKeys.delete(stat.key); // Đã xử lý
+                        } else {
+                            missingStandardKeys.push(stat.name);
+                        }
+                    });
+
+                    // Các key còn lại trong allKeys là các cột lạ (Custom Columns)
+                    allKeys.forEach(customKey => {
+                        activeStatsConfig.push({
+                            key: customKey,
+                            name: customKey, // Tên hiển thị là tên cột gốc
+                            groupClass: 'group-custom',
+                            cellClass: 'group-custom-cell'
+                        });
+                    });
+
+                    // 3. Hiển thị cảnh báo nếu thiếu cột chuẩn
+                    const warningBox = document.getElementById('columnWarning');
+                    if (missingStandardKeys.length > 0) {
+                        warningBox.style.display = 'block';
+                        warningBox.innerHTML = `<strong>Lưu ý:</strong> Các cột chuẩn sau không tìm thấy trong file Excel và đã bị ẩn: ${missingStandardKeys.join(', ')}.`;
+                    } else {
+                        warningBox.style.display = 'none';
+                    }
+
+                    // 4. Vẽ lại Header bảng
+                    renderTableHeaders();
+
+                    Array.from(allUserIds).forEach(userId => {
+                        const juneStats = juneData[userId];
+                        const julyStats = julyData[userId];
+
+                        if (!juneStats && !julyStats) return;
+                        
+                        const dataItem = {
+                            userId,
+                            name: julyStats?.name || juneStats?.name || 'Không xác định',
+                            rank: julyStats?.rank || juneStats?.rank || 'Không xác định',
+                            juneStats,
+                            julyStats,
+                            hasBothData: juneStats && julyStats
+                        };
+
+                        // Tính toán tất cả các trường chênh lệch (Diff)
+                        activeStatsConfig.forEach(stat => {
+                            dataItem[`${stat.key}Diff`] = calculateDifference(julyStats?.[stat.key], juneStats?.[stat.key]);
+                        });
+                        dataItem['win_rateDiff'] = getWinRateDiffValue(julyStats?.win_rate, juneStats?.win_rate);
+                        
+                        currentData.push({
+                            userId,
+                            name: julyStats?.name || juneStats?.name || 'Không xác định',
+                            rank: julyStats?.rank || juneStats?.rank || 'Không xác định',
+                            juneStats,
+                            julyStats,
+                            ...dataItem, // Thêm tất cả các trường diff đã tính
+                            hasBothData: juneStats && julyStats
+                        });
+                    });
+
+                    // Sắp xếp theo tên mặc định thay vì áp dụng bộ lọc ưu tiên ngay
+                    sortTable('name', 'asc');
+
+                } catch (error) {
+                    console.error('Lỗi khi so sánh:', error);
+                } finally {
+                    loadingElement.style.display = 'none';
+                }
+            }, 100);
+        }
+
+        // Hàm vẽ lại Header bảng dựa trên activeStatsConfig
+        function renderTableHeaders() {
+            const thead = document.querySelector('#comparisonTable thead');
+            thead.innerHTML = '';
+
+            // Dòng 1: Tên nhóm cột
+            const tr1 = document.createElement('tr');
+            
+            // Các cột cố định
+            const fixedHeaders = [
+                { text: 'STT', key: 'stt', class: '' },
+                { text: 'Tên', key: 'name', class: '' },
+                { text: 'User ID', key: 'userId', class: 'id-col' },
+                { text: 'Rank', key: 'rank', class: 'info-group-separator rank-col' }
+            ];
+
+            fixedHeaders.forEach(h => {
+                const th = document.createElement('th');
+                th.rowSpan = 2;
+                th.className = `sortable ${h.class}`;
+                th.dataset.sortKey = h.key;
+                th.innerHTML = `${h.text}<span class="sort-icon"></span>`;
+                tr1.appendChild(th);
+            });
+
+            // Các cột chỉ số động
+            activeStatsConfig.forEach(stat => {
+                const th = document.createElement('th');
+                th.colSpan = 3;
+                th.className = `${stat.groupClass} sortable`;
+                th.dataset.sortKey = `${stat.key}Diff`;
+                th.innerHTML = `${stat.name} <span class="sort-icon"></span>`;
+                tr1.appendChild(th);
+            });
+
+            // Cột Win Rate (luôn ở cuối nếu có, nhưng ở đây ta coi nó là cố định cuối cùng)
+            const thWinRate = document.createElement('th');
+            thWinRate.colSpan = 3;
+            thWinRate.className = 'group-win-rate sortable';
+            thWinRate.dataset.sortKey = 'win_rateDiff';
+            thWinRate.innerHTML = 'Tỉ Lệ Chiến Thắng <span class="sort-icon"></span>';
+            tr1.appendChild(thWinRate);
+
+            thead.appendChild(tr1);
+
+            // Dòng 2: Tháng 6, Tháng 7, Tổng (lặp lại cho mỗi nhóm)
+            const tr2 = document.createElement('tr');
+            tr2.id = 'sub-header-row';
+
+            // Tạo header phụ cho mỗi chỉ số trong activeStatsConfig + WinRate
+            const totalMetricGroups = activeStatsConfig.length + 1; // +1 cho WinRate
+            
+            for (let i = 0; i < totalMetricGroups; i++) {
+                const thJune = document.createElement('th');
+                thJune.className = 'month-col month-col-june';
+                thJune.textContent = `Tháng ${selectedMonths.june}`;
+                tr2.appendChild(thJune);
+
+                const thJuly = document.createElement('th');
+                thJuly.className = 'month-col month-col-july';
+                thJuly.textContent = `Tháng ${selectedMonths.july}`;
+                tr2.appendChild(thJuly);
+
+                const thDiff = document.createElement('th');
+                thDiff.className = 'diff-col';
+                thDiff.textContent = 'Tổng';
+                tr2.appendChild(thDiff);
+            }
+            thead.appendChild(tr2);
+        }
+
+        // Hàm sắp xếp bảng
+        function sortTable(columnKey, defaultDirection = 'asc') {
+            if (!currentData.length) return;
+
+            let direction = defaultDirection;
+            // Nếu nhấn vào cột đang sắp xếp, đảo chiều
+            if (currentSort.column === columnKey) {
+                direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            }
+
+            currentSort = { column: columnKey, direction: direction };
+
+            const sortedData = [...currentData].sort((a, b) => {
+                let valA, valB;
+
+                if (columnKey === 'stt') {
+                    // STT được gán khi hiển thị, không có trong currentData, nên không sắp xếp ở đây
+                    return 0;
+                } else if (columnKey === 'name' || columnKey === 'userId' || columnKey === 'rank') {
+                    valA = a[columnKey] || '';
+                    valB = b[columnKey] || '';
+                    return direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                } else {
+                    // Sắp xếp cho các cột số (bao gồm cả các cột Diff)
+                    valA = a[columnKey];
+                    valB = b[columnKey];
+
+                    // Đẩy giá trị null/undefined xuống cuối
+                    if (valA == null) return 1;
+                    if (valB == null) return -1;
+
+                    return direction === 'asc' ? valA - valB : valB - valA;
+                }
+            });
+
+            displaySortedData(sortedData);
+            updateSortIcons();
+        }
+
+        function updateSortIcons() {
+            // Xóa tất cả các icon cũ
+            document.querySelectorAll('.sortable .sort-icon').forEach(icon => {
+                icon.textContent = '↕';
+                icon.parentElement.classList.remove('sorted');
+            });
+
+            // Thêm icon cho cột đang được sắp xếp
+            const activeHeader = document.querySelector(`.sortable[data-sort-key="${currentSort.column}"]`);
+            if (activeHeader) {
+                activeHeader.classList.add('sorted');
+                activeHeader.querySelector('.sort-icon').textContent = currentSort.direction === 'asc' ? '▲' : '▼';
+            }
+        }
+
+        // Hàm hiển thị dữ liệu đã sắp xếp
+        function displaySortedData(sortedData) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = ''; // Xóa nội dung cũ
+
+            // Kiểm tra xem có dữ liệu tháng 6 hay không
+            juneDataExists = Object.keys(juneData).length > 0;
+
+            // Ẩn hoặc hiện các cột tháng 6 dựa trên biến juneDataExists
+            const juneColumns = document.querySelectorAll('.month-col-june');
+            juneColumns.forEach(column => column.style.display = juneDataExists ? '' : 'none');
+
+
+            sortedData.forEach((item, index) => {
+                const { userId, name, rank, juneStats, julyStats, hasBothData } = item;
+
+                const row = document.createElement('tr');
+                if (!hasBothData) row.classList.add('missing-data-row');
+
+                // Tạo HTML cho các chỉ số bằng cách lặp qua mảng cấu hình
+                let statsHtml = '';
+                activeStatsConfig.forEach(stat => {
+                    const juneValue = juneStats?.[stat.key];
+                    const julyValue = julyStats?.[stat.key];
+                    statsHtml += `
+                <td class="${stat.cellClass} month-col">${formatNumber(juneValue, selectedMonths.june)}</td>
+                <td class="${stat.cellClass} month-col">${formatNumber(julyValue, selectedMonths.july)}</td>
+                <td class="${stat.cellClass} diff-col">${formatDifference(juneValue, julyValue, selectedMonths.june, selectedMonths.july)}</td>
+            `;
+                });
+
+                // Xử lý riêng cho Tỉ lệ thắng
+                const winRateDiff = compareWinRates(julyStats?.win_rate, juneStats?.win_rate);
+                let winRateHtml = `
+            <td class="group-win-rate-cell month-col">${juneStats?.win_rate || '<span class="no-data">N/A</span>'}</td>
+            <td class="group-win-rate-cell month-col">${julyStats?.win_rate || '<span class="no-data">N/A</span>'}</td>
+            <td class="group-win-rate-cell diff-col">${winRateDiff}</td>
+        `;
+
+                row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${name}</td>
+            <td class="id-col">${userId}</td>
+            <td class="rank-col">${rank}</td>
+            ${statsHtml}
+            ${winRateHtml}
+        `;
+
+                tableBody.appendChild(row);
+            });
+
+            // Hiển thị tổng
+            displayTotals();
+            updateSortIcons(); // Đảm bảo icon sắp xếp đúng sau khi vẽ lại bảng
+            updateWatermark();
+        }
+
+        function toggleCompactView() {
+            const body = document.body;
+            const btn = document.getElementById('compactViewBtn');
+            const isCompact = body.classList.toggle('compact-view'); // toggle() trả về true nếu class được thêm vào
+
+            const mainHeaders = document.querySelectorAll('#comparisonTable th[colspan]');
+            const subHeaderRow = document.getElementById('sub-header-row');
+
+            if (isCompact) {
+                // Khi ở chế độ Tinh gọn
+                btn.textContent = 'Xem đầy đủ';
+                mainHeaders.forEach(th => th.setAttribute('colspan', '1')); // Đặt colspan về 1
+                if (subHeaderRow) subHeaderRow.style.display = 'none'; // Ẩn hàng tiêu đề phụ
+            } else {
+                // Khi ở chế độ Xem đầy đủ
+                btn.textContent = 'Tinh gọn';
+                mainHeaders.forEach(th => th.setAttribute('colspan', '3')); // Trả colspan về 3
+                if (subHeaderRow) subHeaderRow.style.display = ''; // Hiện lại hàng tiêu đề phụ
+            }
+            // Update watermark size after view toggles
+            // Use a small timeout to allow the DOM to update its layout
+            setTimeout(updateWatermark, 50);
+        }
+
+        // Các hàm tiện ích
+        function formatNumber(num, month) {
+            if (num === undefined || num === null) return `<span class="no-data">No data ${month}</span>`;
+            return num.toLocaleString();
+        }
+
+        function calculateDifference(newVal, oldVal) {
+            if (newVal === undefined || oldVal === undefined) return null;
+            return newVal - oldVal;
+        }
+
+        function formatDifference(oldVal, newVal, oldMonth, newMonth) {
+            if (oldVal === undefined || oldVal === null) {
+                return `<span class="no-data">No data ${oldMonth}</span>`;
+            }
+            if (newVal === undefined || newVal === null) {
+                return `<span class="no-data">No data ${newMonth}</span>`;
+            }
+
+            const diff = calculateDifference(newVal, oldVal);
+            if (diff === null) return '<span class="no-data">N/A</span>';
+            if (diff > 0) return `<span class="positive">+${diff.toLocaleString()}</span>`;
+            if (diff < 0) return `<span class="negative">${diff.toLocaleString()}</span>`;
+            return `<span class="neutral">0</span>`;
+        }
+
+        function compareWinRates(newRate, oldRate) {
+            if (!newRate || !oldRate) return '<span class="no-data">N/A</span>';
+
+            const newNum = parseFloat(newRate.replace('%', ''));
+            const oldNum = parseFloat(oldRate.replace('%', ''));
+            const diff = newNum - oldNum;
+
+            if (diff > 0) return `<span class="positive">+${diff.toFixed(2)}%</span>`;
+            if (diff < 0) return `<span class="negative">${diff.toFixed(2)}%</span>`;
+            return `<span class="neutral">0%</span>`;
+        }
+
+        function getWinRateDiffValue(newRate, oldRate) {
+            if (!newRate || !oldRate) return null;
+            const newNum = parseFloat(newRate.replace('%', ''));
+            const oldNum = parseFloat(oldRate.replace('%', ''));
+            if (isNaN(newNum) || isNaN(oldNum)) return null;
+            return newNum - oldNum;
+        }
+
+
+        // Các hàm xử lý giao diện
+        function searchTable() {
+            // Lấy giá trị tìm kiếm từ ô nhập
+            const input = document.getElementById('searchInput');
+            const filter = input.value.trim().toLowerCase();
+
+            if (!filter) {
+                alert("Vui lòng nhập Tên hoặc ID để tìm kiếm.");
+                return;
+            }
+
+            // Lọc dữ liệu trong currentData
+            const filteredData = currentData.filter(item =>
+                item.name.toLowerCase().includes(filter) || // Tìm theo tên
+                item.userId.toString().includes(filter)    // Tìm theo ID
+            );
+
+            if (filteredData.length === 0) {
+                alert(`Không tìm thấy người chơi với Tên hoặc ID chứa: "${filter}"`);
+                return;
+            }
+
+            // Hiển thị dữ liệu đã lọc
+            displaySortedData(filteredData);
+        }
+
+        function toggleIdColumn() {
+            const idCols = document.querySelectorAll('.id-col');
+            showIdColumn = !showIdColumn;
+
+            idCols.forEach(col => {
+                if (showIdColumn) {
+                    col.classList.remove('hidden-col');
+                } else {
+                    col.classList.add('hidden-col');
+                }
+            });
+        }
+
+        function hideDetailedView() {
+            const container = document.getElementById('detailedViewContainer');
+            if (container) container.style.display = 'none';
+
+            // Only show main content if comparison view is also hidden
+            if (document.getElementById('comparisonViewContainer').style.display === 'none') {
+                showMainContent();
+            }
+        }
+
+        function displayDetailedView(user) {
+            if (!user || !user.userId) {
+                alert("Không tìm thấy thông tin chi tiết của người dùng.");
+                return;
+            }
+
+            const { userId, name, rank, juneStats, julyStats } = user;
+
+
+            // Lấy tháng được chọn từ biến toàn cục
+            const juneMonth = selectedMonths.june;
+            const julyMonth = selectedMonths.july;
+
+            // Tạo mapping từ activeStatsConfig
+            const statMapping = {};
+            activeStatsConfig.forEach(s => statMapping[s.key] = s.name);
+            statMapping['win_rate'] = "Tỉ Lệ Chiến Thắng";
+            
+            let tableBodyHtml = '';
+            for (const key in statMapping) {
+                const statName = statMapping[key];
+                const juneValue = juneStats ? juneStats[key] : undefined;
+                const julyValue = julyStats ? julyStats[key] : undefined;
+
+                const diffHtml = (key === 'win_rate')
+                    ? compareWinRates(julyValue, juneValue)
+                    : formatDifference(juneValue, julyValue, juneMonth, julyMonth);
+
+                tableBodyHtml += `
+            <tr>
+                <td class="stat-name">${statName}</td>
+                <td style="text-align: right;">${key === 'win_rate' ? (juneValue || `<span class="no-data">No data ${juneMonth}</span>`) : formatNumber(juneValue, juneMonth)}</td>
+                <td style="text-align: right;">${key === 'win_rate' ? (julyValue || `<span class="no-data">No data ${julyMonth}</span>`) : formatNumber(julyValue, julyMonth)}</td>
+                <td style="text-align: right;">${diffHtml}</td>
+            </tr>
+        `;
+            }
+
+            const detailedViewHtml = `
+        <div class="detailed-view-card" id="detailed-card-${userId}">
+            <div class="detailed-view-header">
+                <div>
+                    <h2>${name}</h2>
+                    <span class="user-id">ID: <span class="toggle-id" onclick="toggleUserIdVisibility(this)" data-id="${userId}">***</span> | Rank: ${rank}</span>
+                </div>
+                <div>
+                    <button onclick="captureDetailedView('${userId}')" class="tertiary">📸 Chụp ảnh</button>
+                    <button onclick="hideDetailedView()" class="tertiary">Quay lại bảng</button>
+                </div>
+            </div>
+            <div class="detailed-view-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align: left;">Chỉ số</th>
+                            <th style="text-align: right;">Tháng ${juneMonth}</th>
+                            <th style="text-align: right;">Tháng ${julyMonth}</th>
+                            <th style="text-align: right;">Tổng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableBodyHtml}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+            const container = document.getElementById('detailedViewContainer');
+            container.innerHTML = detailedViewHtml;
+            container.style.display = 'block';
+        }
+
+        function toggleUserIdVisibility(element) {
+            const isHidden = element.textContent === '***';
+            if (isHidden) {
+                // Hiện ID
+                element.textContent = element.dataset.id;
+            } else {
+                // Ẩn ID
+                element.textContent = '***';
+            }
+        }
+        async function captureDetailedView(userId) {
+            const user = currentData.find(item => item.userId === userId);
+            if (!user) {
+                alert("Không tìm thấy dữ liệu người dùng để chụp ảnh.");
+                return;
+            }
+
+            const cardElement = document.getElementById(`detailed-card-${userId}`);
+            if (!cardElement) {
+                alert("Không tìm thấy phần tử giao diện để chụp.");
+                return;
+            }
+
+            const captureButton = cardElement.querySelector(`button[onclick="captureDetailedView('${userId}')"]`);
+            const originalButtonHTML = captureButton.innerHTML;
+            captureButton.innerHTML = '📸 Đang xử lý...';
+            captureButton.disabled = true;
+
+            try {
+                const canvas = await html2canvas(cardElement, {
+                    scale: 2, // Tăng độ phân giải cho ảnh nét hơn
+                    useCORS: true,
+                    backgroundColor: '#ffffff' // Đảm bảo nền trắng
+                });
+
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                const safeName = user.name.replace(/[^a-zA-Z0-9]/g, '_'); // Làm sạch tên để dùng cho tên file
+                link.download = `ChiTiet_${safeName}_${user.userId}.png`;
+                link.click(); // Tự động tải file về
+            } catch (error) {
+                console.error('Lỗi khi chụp ảnh chi tiết:', error);
+                alert('Đã xảy ra lỗi khi chụp ảnh. Vui lòng thử lại.');
+            } finally {
+                captureButton.innerHTML = originalButtonHTML;
+                captureButton.disabled = false;
+            }
+        }
+
+        function showDetailedView() {
+            // Lấy giá trị tìm kiếm từ ô nhập
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            if (!searchTerm) {
+                alert("Vui lòng nhập Tên hoặc ID để xem chi tiết.");
+                return;
+            }
+
+            // Tìm kiếm người dùng dựa trên tên hoặc ID
+            const foundUsers = currentData.filter(item =>
+                item.name.toLowerCase().includes(searchTerm) || // Tìm theo tên
+                item.userId.toString().includes(searchTerm)    // Tìm theo ID
+            );
+
+            if (foundUsers.length === 0) {
+                alert(`Không tìm thấy người chơi với Tên hoặc ID chứa: "${searchTerm}"`);
+                return;
+            }
+
+            // Nếu chỉ tìm thấy một người dùng, hiển thị chi tiết
+            if (foundUsers.length === 1) {
+                displayDetailedView(foundUsers[0]);
+            } else {
+                // Nếu tìm thấy nhiều người dùng, hiển thị danh sách lựa chọn
+                displayUserSelection(foundUsers);
+            }
+        }
+
+        function displayUserSelection(users) {
+            let selectionHtml = `
+        <div class="detailed-view-card">
+            <div class="detailed-view-header">
+                <h2>Chọn người chơi để xem chi tiết:</h2>
+                <button onclick="hideDetailedView()" class="tertiary">Quay lại bảng</button>
+            </div>
+            <div class="detailed-view-body">
+                <ul style="list-style-type: none; padding: 0; margin: 0;">
+    `;
+
+            users.forEach(user => {
+                selectionHtml += `
+            <li style="padding: 10px; border-bottom: 1px solid #eee;">
+                <a href="#" onclick="displayDetailedView(currentData.find(item => item.userId === '${user.userId}')); return false;" style="text-decoration: none; color: #2196F3; font-weight: bold;">
+                    ${user.name} (ID: ${user.userId})
+                </a>
+            </li>
+        `;
+            });
+
+            selectionHtml += `
+                </ul>
+            </div>
+        </div>
+    `;
+
+            const container = document.getElementById('detailedViewContainer');
+            container.innerHTML = selectionHtml;
+            container.style.display = 'block';
+        }
+
+        // Chức năng xuất ảnh được lấy từ file index.html theo yêu cầu
+        async function exportToPNG() {
+            if (!currentData.length) {
+                alert("Vui lòng tải dữ liệu trước!");
+                return;
+            }
+
+            // Lấy trực tiếp bảng dữ liệu
+            const tableElement = document.getElementById('comparisonTable');
+
+            if (!tableElement) {
+                alert(`Không tìm thấy bảng dữ liệu để xuất ảnh.`);
+                return;
+            }
+
+            // --- Chuẩn bị chụp: Tạm thời bỏ style sticky của header ---
+            const thElements = tableElement.querySelectorAll('th');
+            const originalThStyles = [];
+            thElements.forEach(th => {
+                originalThStyles.push(th.style.position);
+                th.style.position = 'static';
+            });
+
+            // --- Phản hồi UI ---
+            const exportButton = document.getElementById('exportPngBtn');
+            const originalButtonText = exportButton.textContent;
+            exportButton.textContent = '📸 Đang xử lý...';
+            exportButton.disabled = true;
+
+            setTimeout(async () => {
+                let stylesRestored = false;
+                const restoreStyles = () => {
+                    if (!stylesRestored) {
+                        thElements.forEach((th, index) => {
+                            th.style.position = originalThStyles[index] || '';
+                        });
+                        stylesRestored = true;
+                    }
+                };
+
+                try {
+                    // Chụp ảnh với kích thước đầy đủ của bảng (bao gồm cả phần bị cuộn)
+                    const canvas = await html2canvas(tableElement, {
+                        scale: 1.5,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff',
+                        width: tableElement.scrollWidth,
+                        height: tableElement.scrollHeight,
+                    });
+
+                    restoreStyles();
+
+                    const imageDataUrl = canvas.toDataURL('image/png');
+
+                    const newWindow = window.open();
+                    if (newWindow) {
+                        newWindow.document.write(`<!DOCTYPE html><html><head><title>Báo cáo so sánh</title></head><body style="margin:0;"><img src="${imageDataUrl}" alt="Báo cáo so sánh" style="max-width: 100%; display: block;"></body></html>`);
+                        newWindow.document.close();
+                    } else {
+                        alert("Không thể mở tab mới. Vui lòng kiểm tra cài đặt chặn pop-up của trình duyệt và thử lại.");
+                    }
+
+                } catch (error) {
+                    console.error('Lỗi xuất ảnh:', error);
+                    alert(`Xuất ảnh thất bại! Lỗi: ${error.message}. Vui lòng thử lại hoặc kiểm tra console (F12).`);
+                    restoreStyles(); // Đảm bảo khôi phục nếu có lỗi
+                } finally {
+                    // --- Khôi phục nút ---
+                    exportButton.textContent = originalButtonText;
+                    exportButton.disabled = false;
+                }
+            }, 150);
+        }
+
+        function exportToExcel() {
+            if (currentData.length === 0) {
+                alert("Không có dữ liệu để xuất file Excel.");
+                return;
+            }
+
+            // Nhập nội dung watermark
+            const watermarkElement = document.getElementById('watermark');
+            const currentWatermark = watermarkElement ? watermarkElement.textContent : "";
+            const watermarkText = prompt("Nhập nội dung logo/ghi chú cho file Excel (để trống nếu không cần):", currentWatermark);
+            if (watermarkText === null) return; // Hủy nếu nhấn Cancel
+            if (watermarkElement) watermarkElement.textContent = watermarkText;
+
+            const loading = showLoading("Đang tạo file Excel...");
+
+            setTimeout(() => {
+                try {
+                    // Lấy dữ liệu đang hiển thị
+                    const visibleData = [];
+                    const tableRows = document.getElementById('tableBody').getElementsByTagName('tr');
+                    for (const row of tableRows) {
+                        if (row.style.display !== 'none') {
+                            const userId = row.cells[2].innerText;
+                            const dataItem = currentData.find(item => item.userId === userId);
+                            if (dataItem) visibleData.push(dataItem);
+                        }
+                    }
+
+                    if (visibleData.length === 0) {
+                        alert("Không có dữ liệu nào đang được hiển thị để xuất.");
+                        throw new Error("No visible data");
+                    }
+
+                    // --- Các hàm tiện ích để tạo ô trong Excel ---
+                    const createCell = (value, type = 's', format = null, style = {}, isError = false) => {
+                        const defaultFont = { name: 'Times New Roman', sz: 12 };
+                        const mergedFont = { ...defaultFont, ...(style.font || {}) };
+                        
+                        const cellStyle = { alignment: { horizontal: 'center', vertical: 'center' }, ...style, font: mergedFont };
+                        if (isError) {
+                            cellStyle.font = { ...cellStyle.font, color: { rgb: "FF9C0006" } }; // Màu đỏ đậm cho lỗi
+                        }
+                        const cell = { v: value, t: type, s: cellStyle };
+                        if (format) cell.z = format;
+                        return cell;
+                    };
+
+                    // --- MỚI: Chuẩn bị dữ liệu Tổng Thống Kê ---
+                    const totals = calculateTotals();
+                    // Padding để bắt đầu từ cột H (index 7: A,B,C,D,E,F,G là trống)
+                    const paddingH = Array.from({ length: 7 }, () => createCell(""));
+                    const summaryHeaders = [...paddingH, createCell("Tổng Thống Kê", 's', null, { font: { bold: true } })];
+                    const summaryRow = [...paddingH, createCell("")];
+                    
+                    // Danh sách các chỉ số tổng cần xuất theo thứ tự yêu cầu
+                    const summaryMetrics = [
+                        { key: 'killsDiff', label: 'Tổng Kills' },
+                        { key: 'troops_lostDiff', label: 'Tổng Số Quân Tổn Thất' },
+                        { key: 'enemies_destroyedDiff', label: 'Tổng Kẻ Thù Tiêu Diệt' },
+                        { key: 'enemy_woundedDiff', label: 'Tổng Quân Địch Bị Thương' },
+                        { key: 'troops_woundedDiff', label: 'Tổng Quân Đội Bị Thương' }
+                    ];
+
+                    summaryMetrics.forEach(metric => {
+                        if (totals[metric.key] !== undefined) {
+                            summaryHeaders.push(createCell(metric.label, 's', null, { font: { bold: true } }));
+                            
+                            const val = totals[metric.key];
+                            const style = { font: { bold: true } };
+                            if (val > 0) style.font.color = { rgb: "FF008000" }; // Màu Xanh
+                            if (val < 0) style.font.color = { rgb: "FFFF0000" }; // Màu Đỏ
+                            summaryRow.push(createCell(val, 'n', '+#,##0;-#,##0;0', style));
+                        }
+                    });
+
+                    const dataToExport = [summaryHeaders, summaryRow, [], []]; // Khởi tạo với dữ liệu tổng
+
+                    // Tạo danh sách cột cho xuất Excel đầy đủ: Bao gồm tất cả cột chuẩn + cột tùy chỉnh (nếu có)
+                    const fullExportConfig = [...DEFAULT_STATS_CONFIG];
+                    
+                    // Thêm các cột tùy chỉnh (có trong activeStatsConfig nhưng không có trong DEFAULT_STATS_CONFIG)
+                    activeStatsConfig.forEach(stat => {
+                        if (!DEFAULT_STATS_CONFIG.some(s => s.key === stat.key)) {
+                            fullExportConfig.push(stat);
+                        }
+                    });
+
+                    const headers = ["Loại Dữ Liệu", "Tên", "User ID", "Rank"];
+                    fullExportConfig.forEach(s => headers.push(s.name));
+                    headers.push("Tỉ Lệ Chiến Thắng");
+
+                    // Tiêu đề chính
+                    // Ghi đè dòng trống đầu tiên bằng tiêu đề báo cáo
+                    dataToExport[2] = [createCell(`Báo cáo so sánh thống kê - Ngày xuất: ${new Date().toLocaleString('vi-VN')}${watermarkText ? ` - ${watermarkText}` : ''}`, 's', null, { font: { bold: true } })];
+                    dataToExport.push(headers.map(h => createCell(h, 's', null, { font: { bold: true } })));
+
+                    const createNumericCell = (value, month, style = {}) => {
+                        if (value === undefined || value === null) {
+                            return createCell(`No data ${month}`, 's', null, style, true);
+                        }
+                        return createCell(value, 'n', '#,##0', style);
+                    };
+
+                    const createDiffCell = (diff, oldVal, newVal, oldMonth, newMonth, style = {}) => {
+                        if (oldVal === undefined || oldVal === null) return createCell(`No data ${oldMonth}`, 's', null, style, true);
+                        if (newVal === undefined || newVal === null) return createCell(`No data ${newMonth}`, 's', null, style, true);
+                        if (diff === null || diff === undefined) return createCell("N/A", 's', null, style, true);
+                        const cellStyle = { ...style, font: { ...(style.font || {}) } };
+                        if (diff > 0) cellStyle.font.color = { rgb: "FF008000" }; // Green
+                        if (diff < 0) cellStyle.font.color = { rgb: "FFFF0000" }; // Red
+                        return createCell(diff, 'n', '+#,##0;-#,##0;0', cellStyle);
+                    };
+
+                    const createWinRateDiffCell = (newRate, oldRate, style = {}) => {
+                        if (!oldRate) return createCell(`No data ${selectedMonths.june}`, 's', null, style, true);
+                        if (!newRate) return createCell(`No data ${selectedMonths.july}`, 's', null, style, true);
+                        const newNum = parseFloat(newRate.replace(',', '.').replace('%', ''));
+                        const oldNum = parseFloat(oldRate.replace(',', '.').replace('%', ''));
+                        if (isNaN(newNum) || isNaN(oldNum)) return createCell("N/A", 's', null, style, true);
+
+                        const diff = newNum - oldNum;
+                        const cellStyle = { ...style, font: { ...(style.font || {}) } };
+                        let text = `${diff.toFixed(2)}%`;
+                        if (diff > 0) {
+                            cellStyle.font.color = { rgb: "FF008000" }; // Green
+                            text = `+${text}`;
+                        } else if (diff < 0) {
+                            cellStyle.font.color = { rgb: "FFFF0000" }; // Red
+                        }
+                        return createCell(text, 's', null, cellStyle);
+                    };
+
+                    visibleData.forEach((item, index) => {
+                        const { userId, name, rank, juneStats, julyStats } = item;
+                        const getStat = (stats, key) => (stats ? stats[key] : undefined);
+                        
+                        // Tạo style nền xen kẽ (zebra striping)
+                        const rowStyle = index % 2 === 1 ? { fill: { fgColor: { rgb: "FFF2F2F2" } } } : {};
+
+                        // Tạo dòng tháng 6
+                        const juneRow = [ 
+                            createCell("", 's', null, rowStyle), createCell(name, 's', null, rowStyle), createCell(userId, 's', null, rowStyle), createCell(rank, 's', null, rowStyle),
+                        ];
+                        fullExportConfig.forEach(s => juneRow.push(createNumericCell(getStat(juneStats, s.key), selectedMonths.june, rowStyle)));
+                        juneRow.push(createCell(getStat(juneStats, 'win_rate') || '0%', 's', null, rowStyle));
+                        dataToExport.push(juneRow);
+
+                        // Tạo dòng tháng 7
+                        const julyRow = [
+                            createCell("", 's', null, rowStyle), createCell(name, 's', null, rowStyle), createCell(userId, 's', null, rowStyle), createCell(rank, 's', null, rowStyle),
+                        ];
+                        fullExportConfig.forEach(s => julyRow.push(createNumericCell(getStat(julyStats, s.key), selectedMonths.july, rowStyle)));
+                        julyRow.push(createCell(getStat(julyStats, 'win_rate') || '0%', 's', null, rowStyle));
+                        dataToExport.push(julyRow);
+
+                        // Tạo dòng Diff
+                        const diffRow = [
+                            createCell("Tổng", 's', null, { ...rowStyle, font: { bold: true } }), createCell("", 's', null, rowStyle), createCell("", 's', null, rowStyle), createCell("", 's', null, rowStyle),
+                        ];
+                        fullExportConfig.forEach(s => {
+                            diffRow.push(createDiffCell(
+                                calculateDifference(getStat(julyStats, s.key), getStat(juneStats, s.key)), 
+                                getStat(juneStats, s.key), 
+                                getStat(julyStats, s.key), 
+                                selectedMonths.june, 
+                                selectedMonths.july,
+                                rowStyle
+                            ));
+                        });
+                        diffRow.push(createWinRateDiffCell(getStat(julyStats, 'win_rate'), getStat(juneStats, 'win_rate'), rowStyle));
+                        dataToExport.push(diffRow);
+
+                        dataToExport.push([]); // Dòng trống phân cách
+                    });
+
+                    const ws = XLSX.utils.aoa_to_sheet(dataToExport);
+
+                    // Tự động điều chỉnh độ rộng cột
+                    const objectMaxLength = dataToExport.reduce((acc, row, index) => {
+                        if (index === 2) return acc; // Bỏ qua dòng tiêu đề gộp (index 2) để không làm hỏng độ rộng cột 1
+                        row.forEach((cell, i) => {
+                            let cellLength = 0;
+                            if (cell && cell.t === 'n') {
+                                const val = typeof cell.v === 'number' ? cell.v : 0;
+                                let str = Math.abs(val).toLocaleString('vi-VN');
+                                cellLength = str.length + (val < 0 || (cell.z && cell.z.includes('+')) ? 1 : 0);
+                            } else {
+                                const cellValue = cell && cell.v ? cell.v : (cell || '');
+                                cellLength = String(cellValue).length;
+                            }
+                            acc[i] = Math.max(acc[i] || 0, cellLength);
+                        });
+                        return acc;
+                    }, []);
+                    ws["!cols"] = objectMaxLength.map(width => ({ wch: width + 2.5 })); // Auto-fill vừa đủ (+2.5 padding)
+                    ws['!merges'] = [{ s: { r: 2, c: 0 }, e: { r: 2, c: headers.length - 1 } }];
+
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "So Sánh Thống Kê");
+                    XLSX.writeFile(wb, `SoSanhThongKe_${new Date().toISOString().slice(0, 10)}.xlsx`);
+                } catch (error) {
+                    if (error.message === "No visible data") return; // Đã có alert, không cần báo lỗi thêm
+                    console.error("Lỗi khi xuất Excel:", error);
+                    alert("Đã xảy ra lỗi khi tạo file Excel. Vui lòng kiểm tra console (F12) để biết chi tiết.");
+                } finally {
+                    loading.remove();
+                }
+            }, 50);
+        }
+
+        function exportToCompactExcel() {
+            if (currentData.length === 0) {
+                alert("Không có dữ liệu để xuất file Excel.");
+                return;
+            }
+
+            // Nhập nội dung watermark
+            const watermarkElement = document.getElementById('watermark');
+            const currentWatermark = watermarkElement ? watermarkElement.textContent : "";
+            const watermarkText = prompt("Nhập nội dung logo/ghi chú cho file Excel (để trống nếu không cần):", currentWatermark);
+            if (watermarkText === null) return; // Hủy nếu nhấn Cancel
+            if (watermarkElement) watermarkElement.textContent = watermarkText;
+
+            const loading = showLoading("Đang tạo file Excel tinh gọn...");
+
+            setTimeout(() => {
+                try {
+                    // Lấy dữ liệu đang hiển thị, tôn trọng các bộ lọc hiện tại
+                    const visibleData = [];
+                    const tableRows = document.getElementById('tableBody').getElementsByTagName('tr');
+                    for (const row of tableRows) {
+                        if (row.style.display !== 'none') {
+                            const stt = row.cells[0].innerText;
+                            const userId = row.cells[2].innerText; // User ID vẫn ở cột 3 dù có thể bị ẩn
+                            const dataItem = currentData.find(item => item.userId === userId);
+                            if (dataItem) {
+                                visibleData.push({
+                                    ...dataItem,
+                                    stt
+                                }); // Thêm STT vào đối tượng
+                            }
+                        }
+                    }
+
+                    if (visibleData.length === 0) {
+                        alert("Không có dữ liệu nào đang được hiển thị để xuất.");
+                        throw new Error("No visible data");
+                    }
+
+                    const createCell = (value, type = 's', format = null, style = {}) => {
+                        const defaultFont = { name: 'Times New Roman', sz: 12 };
+                        const mergedFont = { ...defaultFont, ...(style.font || {}) };
+                        
+                        const cellStyle = { alignment: { horizontal: 'center', vertical: 'center' }, ...style, font: mergedFont };
+                        const cell = { v: value, t: type, s: cellStyle };
+                        if (format) cell.z = format;
+                        return cell;
+                    };
+
+                    // --- MỚI: Chuẩn bị dữ liệu Tổng Thống Kê ---
+                    const totals = calculateTotals();
+                    // Padding để bắt đầu từ cột C (index 2: A,B là trống)
+                    const paddingC = Array.from({ length: 2 }, () => createCell(""));
+                    const summaryHeaders = [...paddingC, createCell(`Tổng Thống Kê${watermarkText ? ` (${watermarkText})` : ''}`, 's', null, { font: { bold: true } })];
+                    const summaryRow = [...paddingC, createCell("")];
+                    
+                    // Danh sách các chỉ số tổng cần xuất theo thứ tự yêu cầu
+                    const summaryMetrics = [
+                        { key: 'killsDiff', label: 'Tổng Kills' },
+                        { key: 'troops_lostDiff', label: 'Tổng Số Quân Tổn Thất' },
+                        { key: 'enemies_destroyedDiff', label: 'Tổng Kẻ Thù Tiêu Diệt' },
+                        { key: 'enemy_woundedDiff', label: 'Tổng Quân Địch Bị Thương' },
+                        { key: 'troops_woundedDiff', label: 'Tổng Quân Đội Bị Thương' }
+                    ];
+
+                    summaryMetrics.forEach(metric => {
+                        if (totals[metric.key] !== undefined) {
+                            summaryHeaders.push(createCell(metric.label, 's', null, { font: { bold: true } }));
+                            
+                            const val = totals[metric.key];
+                            const style = { font: { bold: true } };
+                            if (val > 0) style.font.color = { rgb: "FF008000" }; // Màu Xanh
+                            if (val < 0) style.font.color = { rgb: "FFFF0000" }; // Màu Đỏ
+                            summaryRow.push(createCell(val, 'n', '+#,##0;-#,##0;0', style));
+                        }
+                    });
+
+                    const dataToExport = [summaryHeaders, summaryRow, []]; // Khởi tạo với dữ liệu tổng
+
+                    // Xác định các cột chuẩn cần xuất cho bản tinh gọn theo yêu cầu
+                    const compactStandardKeys = [
+                        'might', 'kills', 'enemies_destroyed', 
+                        'enemy_wounded', 'troops_lost', 'troops_wounded'
+                    ];
+
+                    // Lọc activeStatsConfig: Chỉ lấy các cột chuẩn được yêu cầu HOẶC các cột lạ (custom)
+                    const compactExportConfig = activeStatsConfig.filter(stat => {
+                        if (compactStandardKeys.includes(stat.key)) return true; // Cột chuẩn được yêu cầu
+                        if (!DEFAULT_STATS_CONFIG.some(s => s.key === stat.key)) return true; // Cột lạ (không có trong cấu hình mặc định)
+                        return false; // Cột chuẩn không được yêu cầu (ví dụ: victories, successful_attacks...)
+                    });
+
+                    // Header chỉ gồm STT, Tên và các cột trong cấu hình tinh gọn (Bỏ User ID theo yêu cầu)
+                    const headers = ["STT", "Tên"];
+                    compactExportConfig.forEach(s => headers.push(s.name));
+
+                    dataToExport.push(headers.map(h => createCell(h, 's', null, { font: { bold: true } })));
+
+                    const getDiff = (item, key) => {
+                        const oldVal = item.juneStats?.[key];
+                        const newVal = item.julyStats?.[key];
+                        if (oldVal === undefined || oldVal === null) {
+                            return `No data ${selectedMonths.june}`;
+                        }
+                        if (newVal === undefined || newVal === null) {
+                            return `No data ${selectedMonths.july}`;
+                        }
+                        return newVal - oldVal;
+                    };
+
+                    visibleData.forEach((item, index) => {
+                        // Tạo style nền xen kẽ (zebra striping)
+                        const rowStyle = index % 2 === 1 ? { fill: { fgColor: { rgb: "FFF2F2F2" } } } : {};
+
+                        const row = [
+                            createCell(parseInt(item.stt, 10), 'n', null, rowStyle), createCell(item.name, 's', null, rowStyle)
+                        ];
+                        compactExportConfig.forEach(s => {
+                            const diff = getDiff(item, s.key);
+                            if (typeof diff === 'number') {
+                                const style = { ...rowStyle, font: {} };
+                                if (diff > 0) style.font.color = { rgb: "FF008000" }; // Màu Xanh
+                                if (diff < 0) style.font.color = { rgb: "FFFF0000" }; // Màu Đỏ
+                                row.push(createCell(diff, 'n', '+#,##0;-#,##0;0', style));
+                            } else {
+                                row.push(createCell(diff, 's', null, rowStyle));
+                            }
+                        });
+                        dataToExport.push(row);
+                    });
+
+                    const ws = XLSX.utils.aoa_to_sheet(dataToExport);
+                    const objectMaxLength = dataToExport.reduce((acc, row) => { 
+                        row.forEach((cell, i) => { 
+                            let cellLength = 0;
+                            if (cell && cell.t === 'n') {
+                                const val = typeof cell.v === 'number' ? cell.v : 0;
+                                let str = Math.abs(val).toLocaleString('vi-VN');
+                                cellLength = str.length + (val < 0 || (cell.z && cell.z.includes('+')) ? 1 : 0);
+                            } else {
+                                const cellValue = cell && cell.v ? cell.v : (cell || '');
+                                cellLength = String(cellValue).length;
+                            }
+                            acc[i] = Math.max(acc[i] || 0, cellLength); 
+                        }); 
+                        return acc; 
+                    }, []);
+                    ws["!cols"] = objectMaxLength.map(width => ({ wch: width + 2.5 })); // Auto-fill vừa đủ
+
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "BaoCaoTinhGon");
+                    XLSX.writeFile(wb, `BaoCaoTinhGon_${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+                } catch (error) {
+                    if (error.message !== "No visible data") { console.error("Lỗi khi xuất Excel tinh gọn:", error); alert("Đã xảy ra lỗi khi tạo file Excel tinh gọn. Vui lòng kiểm tra console (F12)."); }
+                } finally {
+                    loading.remove();
+                }
+            }, 50);
+        }
+
+        function showLoading(message) {
+            const loading = document.createElement('div');
+            loading.style.position = 'fixed';
+            loading.style.top = '0';
+            loading.style.left = '0';
+            loading.style.width = '100%';
+            loading.style.height = '100%';
+            loading.style.backgroundColor = 'rgba(0,0,0,0.7)';
+            loading.style.display = 'flex';
+            loading.style.flexDirection = 'column';
+            loading.style.justifyContent = 'center';
+            loading.style.alignItems = 'center';
+            loading.style.zIndex = '9999';
+            loading.innerHTML = `
+                <div style="color:white;font-size:20px;margin-bottom:10px;">${message}</div>
+                <div class="spinner"></div>
+            `;
+            document.body.appendChild(loading);
+            return loading;
+        }
+
+        function resetTable() {
+            document.getElementById('searchInput').value = '';
+            document.body.classList.remove('compact-view');
+            document.body.classList.remove('compact-view');
+            document.getElementById('compactViewBtn').textContent = 'Tinh gọn';
+            sortTable('name', 'asc');
+        }
+
+        function updateWatermark() {
+            const tableWrapper = document.getElementById('tableWrapper');
+            const watermark = document.getElementById('watermark');
+            if (tableWrapper && watermark) {
+                // Watermark được xoay 90 độ. Chiều cao trực quan của nó là chiều rộng ban đầu của chữ,
+                // và chiều rộng trực quan của nó là chiều cao ban đầu của chữ (tức là kích thước phông chữ).
+
+                // Ràng buộc 1: Chiều cao trực quan phải vừa với chiều cao của bảng.
+                // Tỷ lệ rộng/cao của chữ "FvN" là khoảng 1.8.
+                // => fontSize <= tableWrapper.offsetHeight / 1.8
+                const maxHeightFontSize = tableWrapper.offsetHeight / 1.8;
+
+                // Ràng buộc 2: Chiều rộng trực quan phải vừa với chiều rộng của bảng.
+                // Thêm một chút lề (ví dụ: 90%) để không bị quá sát.
+                const maxWidthFontSize = tableWrapper.offsetWidth * 0.9;
+
+                // Kích thước phông chữ cuối cùng phải thỏa mãn cả hai ràng buộc.
+                const fontSize = Math.min(maxHeightFontSize, maxWidthFontSize);
+                watermark.style.fontSize = `${fontSize}px`;
+            }
+        }
+
+        // Khởi tạo sự kiện
+        window.onload = function () {
+            document.getElementById('searchInput').addEventListener('keyup', function (event) {
+                if (event.key === 'Enter') {
+                    searchTable();
+                }
+            });
+
+            window.addEventListener('resize', updateWatermark);
+
+            // Gán sự kiện click cho các header có thể sắp xếp (Sử dụng Event Delegation vì header được tạo động)
+            document.querySelector('#comparisonTable thead').addEventListener('click', (event) => {
+                const header = event.target.closest('th.sortable');
+                if (header) {
+                    const sortKey = header.dataset.sortKey;
+                    if (sortKey) sortTable(sortKey);
+                }
+            });
+
+            // Thêm sự kiện để xử lý việc chọn file và tự động tải
+            document.getElementById('juneFile').addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (!file) {
+                    document.getElementById('juneFileName').textContent = '';
+                    return;
+                }
+                document.getElementById('juneFileName').textContent = file.name;
+                document.getElementById('juneUrl').value = ''; // Xóa URL nếu đã chọn file
+                handleFileUpload(file, 'june'); // Tự động xử lý file
+            });
+
+            document.getElementById('julyFile').addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (!file) {
+                    document.getElementById('julyFileName').textContent = '';
+                    return;
+                }
+                document.getElementById('julyFileName').textContent = file.name;
+                document.getElementById('julyUrl').value = ''; // Xóa URL nếu đã chọn file
+                handleFileUpload(file, 'july'); // Tự động xử lý file
+            });
+
+            // Thêm sự kiện để xử lý việc nhập URL
+            document.getElementById('juneUrl').addEventListener('input', function (e) {
+                // Nếu người dùng bắt đầu nhập URL, xóa lựa chọn file
+                if (e.target.value.trim() !== '') {
+                    document.getElementById('juneFile').value = '';
+                    document.getElementById('juneFileName').textContent = '';
+                }
+            });
+
+            document.getElementById('julyUrl').addEventListener('input', function (e) {
+                // Nếu người dùng bắt đầu nhập URL, xóa lựa chọn file
+                if (e.target.value.trim() !== '') {
+                    document.getElementById('julyFile').value = '';
+                    document.getElementById('julyFileName').textContent = '';
+                }
+            });
+
+            // === TỰ ĐỘNG ĐIỀN URL MẶC ĐỊNH TỪC TỪ GITHUB ===
+            // Người dùng sẽ cần nhấn nút "Tải Dữ Liệu" để bắt đầu
+            const juneFileUrl = 'https://docs.google.com/spreadsheets/d/1vxjNifx_pgJjDlZ-FK6_Y2NpzKU1ArcV/edit?gid=45285307#gid=45285307';
+            const julyFileUrl = 'https://docs.google.com/spreadsheets/d/1nTET8tLm4cYlci3_LWljMXPlTlxuvBOS/edit?gid=823266667#gid=823266667';
+
+            document.getElementById('juneUrl').value = juneFileUrl;
+            document.getElementById('julyUrl').value = julyFileUrl;
+
+            // Gán sự kiện cho nút chuyển đổi dữ liệu của Biểu đồ So sánh
+            // Phương pháp này đảm bảo nút đã tồn tại trên trang trước khi gán sự kiện, giải quyết lỗi ReferenceError
+            const toggleBtn = document.getElementById('toggleOverallChartBtn');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function () {
+                    // Khi nút được nhấn, đảo ngược trạng thái và vẽ lại biểu đồ
+                    window.showMonthlyDataOverall = !window.showMonthlyDataOverall;
+                    showOverallComparisonChart();
+                });
+            }
+
+            // Gán sự kiện cho các nút trong modal OCR
+            const addJuneBtn = document.getElementById('addOcrToJuneBtn');
+            const addJulyBtn = document.getElementById('addOcrToJulyBtn');
+            if (addJuneBtn && addJulyBtn) {
+                addJuneBtn.addEventListener('click', () => { addOcrDataToComparison('june'); });
+                addJulyBtn.addEventListener('click', () => {
+                    addOcrDataToComparison('july');
+                });
+            }
+
+            // Gán sự kiện cho các nút mới của OCR
+            const mergeBtn = document.getElementById('mergeOcrBtn');
+            const secondImageInput = document.getElementById('secondOcrImageInput');
+            const copyBtn = document.getElementById('copyOcrTextBtn');
+
+            if (mergeBtn && secondImageInput && copyBtn) {
+                mergeBtn.addEventListener('click', () => secondImageInput.click());
+                secondImageInput.addEventListener('change', handleSecondImageUpload);
+                copyBtn.addEventListener('click', copyOcrTextToClipboard);
+            }
+        };
+
+        function updateMonth(type) {
+            const monthSelect = document.getElementById(`${type}MonthSelect`);
+            const selectedMonth = parseInt(monthSelect.value, 10); // Lấy giá trị tháng được chọn
+            selectedMonths[type] = selectedMonth; // Lưu tháng được chọn vào biến toàn cục
+
+            const monthTitle = document.getElementById(`monthTitle${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            const monthButton = document.querySelector(`button[onclick="loadData('${type}')"]`);
+
+            // Cập nhật tiêu đề và nút
+            monthTitle.textContent = `Dữ liệu Tháng ${selectedMonth}`;
+            monthButton.textContent = `Tải Dữ Liệu Tháng ${selectedMonth}`;
+
+            // Cập nhật placeholder URL
+            const urlInput = document.getElementById(`${type}Url`);
+            urlInput.placeholder = `Dán link Google Sheets/GitHub Raw cho Tháng ${selectedMonth}...`;
+
+            // Cập nhật tiêu đề các cột trong bảng
+            updateTableHeaders(type, selectedMonth);
+        }
+
+        function updateTableHeaders(type, selectedMonth) {
+            const columnClass = type === 'june' ? 'month-col-june' : 'month-col-july';
+            const headers = document.querySelectorAll(`.${columnClass}`);
+            headers.forEach(header => {
+                header.textContent = `Tháng ${selectedMonth}`;
+            });
+        }
+        function calculateTotals() {
+            const totals = {
+                // Khởi tạo động dựa trên activeStatsConfig
+            };
+            
+            // Chỉ tính tổng cho các cột có trong activeStatsConfig
+            activeStatsConfig.forEach(stat => {
+                totals[`${stat.key}Diff`] = 0;
+            });
+
+            currentData.forEach(item => {
+                const { juneStats, julyStats } = item;
+
+                // Hàm chuyển đổi giá trị thành số hợp lệ
+                const parseValue = (value) => {
+                    if (typeof value === 'number') return value;
+                    if (typeof value === 'string') {
+                        const parsed = parseFloat(value.replace(/[^0-9.-]/g, ''));
+                        return isNaN(parsed) ? 0 : parsed;
+                    }
+                    return 0;
+                };
+
+                activeStatsConfig.forEach(stat => {
+                    const valJune = parseValue(juneStats?.[stat.key]);
+                    const valJuly = parseValue(julyStats?.[stat.key]);
+                    if (juneStats && julyStats) {
+                        totals[`${stat.key}Diff`] += (valJuly - valJune);
+                    }
+                });
+            });
+
+            return totals;
+        }
+        function displayTotals() {
+            const totals = calculateTotals();
+
+            // Cập nhật các phần tử HTML nếu chúng tồn tại (chỉ cập nhật các chỉ số chính)
+            const updateElement = (id, key) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    const val = totals[key];
+                    // Chỉ hiển thị số nếu có giá trị, ngược lại hiển thị 0
+                    el.textContent = (typeof val === 'number') ? val.toLocaleString('vi-VN') : '0';
+                }
+            };
+
+            updateElement('totalKills', 'killsDiff');
+            updateElement('totalTroopsLost', 'troops_lostDiff');
+            updateElement('totalEnemyWounded', 'enemy_woundedDiff');
+            updateElement('totalTroopsWounded', 'troops_woundedDiff');
+            updateElement('totalEnemiesDestroyed', 'enemies_destroyedDiff');
+
+            document.getElementById('totalsContainer').style.display = 'block';
+        }
+        async function showGitHubFiles(type) {
+            const githubFilesContainer = document.getElementById(`githubFiles${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            const githubFileSelect = document.getElementById(`githubFileSelect${type.charAt(0).toUpperCase() + type.slice(1)}`);
+
+            // Hiển thị container
+            githubFilesContainer.style.display = 'block';
+
+            // Gọi GitHub API để lấy danh sách file
+            try {
+                const response = await fetch('https://api.github.com/repos/heo-sieu-doi/quai-kill/contents/');
+                if (!response.ok) {
+                    throw new Error(`Lỗi khi gọi GitHub API: ${response.status}`);
+                }
+
+                const files = await response.json();
+                githubFileSelect.innerHTML = '<option value="">-- Chọn file --</option>'; // Reset danh sách
+
+                // Lọc các file Excel và thêm vào dropdown
+                files
+                    .filter(file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))
+                    .forEach(file => {
+                        const option = document.createElement('option');
+                        option.value = file.download_url; // URL tải file
+                        option.textContent = file.name; // Tên file
+                        githubFileSelect.appendChild(option);
+                    });
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách file từ GitHub:', error);
+                alert('Không thể lấy danh sách file từ GitHub. Vui lòng thử lại sau.');
+            }
+        }
+
+        function selectGitHubFile(type) {
+            const githubFileSelect = document.getElementById(`githubFileSelect${type.charAt(0).toUpperCase() + type.slice(1)}`);
+            const selectedFileUrl = githubFileSelect.value;
+
+            if (selectedFileUrl) {
+                // Gán URL file vào ô nhập URL
+                document.getElementById(`${type}Url`).value = selectedFileUrl;
+
+                // Tự động tải file
+                loadData(type);
+            }
+        }
+        function validateData() {
+            currentData.forEach((item, index) => {
+                const { juneStats, julyStats } = item;
+
+                const checkValue = (value, key, month) => {
+                    if (value === undefined || value === null || isNaN(value)) {
+                        console.warn(`Dữ liệu không hợp lệ tại bản ghi ${index + 1}, cột ${key}, tháng ${month}:`, value);
+                    }
+                };
+
+                if (juneStats) {
+                    Object.keys(juneStats).forEach(key => checkValue(juneStats[key], key, 'June'));
+                }
+                if (julyStats) {
+                    Object.keys(julyStats).forEach(key => checkValue(julyStats[key], key, 'July'));
+                }
+            });
+        }
+        function getRowsByRange(rangeString) {
+            const ranges = rangeString.split(',').map(range => {
+                const [start, end] = range.split('-').map(num => parseInt(num.trim(), 10));
+                return { start, end };
+            });
+
+            const tableRows = Array.from(document.querySelectorAll('#tableBody tr'));
+            const groups = [];
+
+            ranges.forEach(({ start, end }) => {
+                if (isNaN(start) || isNaN(end) || start > end) {
+                    alert(`Phạm vi không hợp lệ: ${start}-${end}`);
+                    return;
+                }
+
+                const currentGroup = [];
+                tableRows.forEach(row => {
+                    const sttCell = row.querySelector('td:first-child');
+                    if (sttCell) {
+                        const stt = parseInt(sttCell.textContent.trim(), 10);
+                        if (stt >= start && stt <= end) {
+                            currentGroup.push(row.cloneNode(true)); // Sao chép hàng
+                        }
+                    }
+                });
+                if (currentGroup.length > 0) {
+                    groups.push(currentGroup);
+                }
+            });
+
+            return groups;
+        }
+        async function exportToPNGByRange() {
+            const rangeInput = prompt("Nhập phạm vi STT (ví dụ: 1-50, 51-95):").trim();
+            if (!rangeInput) {
+                alert('Vui lòng nhập phạm vi STT để xuất ảnh.');
+                return;
+            }
+
+            const rowGroups = getRowsByRange(rangeInput);
+            if (rowGroups.length === 0) {
+                alert('Không tìm thấy hàng nào trong phạm vi STT đã nhập.');
+                return;
+            }
+
+            const tableElement = document.getElementById('comparisonTable');
+            const originalTableBody = document.getElementById('tableBody');
+            const originalRows = Array.from(originalTableBody.children);
+
+            const exportButton = document.getElementById('exportPngBtn');
+            const originalButtonText = exportButton.textContent;
+            exportButton.textContent = '📸 Đang xử lý...';
+            exportButton.disabled = true;
+
+            try {
+                const generatedImages = []; // Mảng chứa kết quả ảnh
+                
+                // Duyệt qua từng nhóm phạm vi (tương ứng với các dấu phẩy trong input)
+                for (const groupRows of rowGroups) {
+                    // Trong mỗi nhóm, chia nhỏ nếu quá 50 hàng để tránh ảnh quá dài
+                    const chunks = [];
+                    let currentChunk = [];
+                    groupRows.forEach((row, index) => {
+                        currentChunk.push(row);
+                        if ((index + 1) % 50 === 0 || index === groupRows.length - 1) {
+                            chunks.push(currentChunk);
+                            currentChunk = [];
+                        }
+                    });
+
+                    // Xuất từng chunk thành ảnh
+                    for (let i = 0; i < chunks.length; i++) {
+                    // Tạm thời thay thế nội dung bảng bằng nhóm hàng hiện tại
+                    // --- MỚI: Lấy HTML của mục tổng thống kê ---
+                    const totalsContainer = document.getElementById('totalsContainer');
+                    // Chỉ hiển thị tổng ở ảnh đầu tiên của toàn bộ quá trình xuất
+                    const summaryHtml = (generatedImages.length === 0 && totalsContainer.style.display !== 'none') ? totalsContainer.outerHTML : '';
+
+                    originalTableBody.innerHTML = '';
+                    chunks[i].forEach(row => originalTableBody.appendChild(row));
+
+                    // Cập nhật lại kích thước watermark cho vừa với bảng tạm và chờ DOM cập nhật
+                    updateWatermark();
+                    await new Promise(resolve => setTimeout(resolve, 50));
+
+                    // Chụp ảnh container để bao gồm cả bảng và watermark
+                    const captureTarget = document.getElementById('tableWrapper'); // Đây là div chứa bảng và watermark
+
+                    // --- MỚI: Tạo một div tạm để gộp summary và bảng ---
+                    const tempCaptureDiv = document.createElement('div');
+                    tempCaptureDiv.style.display = 'inline-block'; // Để html2canvas tính đúng kích thước
+                    tempCaptureDiv.innerHTML = summaryHtml; // Thêm summary vào trước
+                    tempCaptureDiv.appendChild(captureTarget.cloneNode(true)); // Thêm bản sao của bảng
+                    document.body.appendChild(tempCaptureDiv); // Phải thêm vào body để có thể chụp
+
+                    const canvas = await html2canvas(tempCaptureDiv, {
+                        scale: 1.5,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff',
+                    });
+
+                    document.body.removeChild(tempCaptureDiv); // Dọn dẹp div tạm
+
+                    // Lưu data URL vào mảng thay vì tải xuống ngay
+                    generatedImages.push(canvas.toDataURL('image/png'));
+                }
+                }
+                // Hiển thị modal kết quả
+                showExportResultModal(generatedImages);
+            } catch (error) {
+                console.error('Lỗi xuất ảnh:', error);
+                alert(`Xuất ảnh thất bại! Lỗi: ${error.message}`);
+            } finally {
+                // Khôi phục bảng gốc
+                originalTableBody.innerHTML = '';
+                originalRows.forEach(row => originalTableBody.appendChild(row));
+
+                // Cập nhật lại watermark cho bảng đầy đủ
+                updateWatermark();
+
+                // Khôi phục nút
+                exportButton.textContent = originalButtonText;
+                exportButton.disabled = false;
+            }
+        }
+        function showUpdateDataModal() {
+            document.getElementById('updateDataModal').style.display = 'block';
+        }
+
+        function closeUpdateDataModal() {
+            document.getElementById('updateDataModal').style.display = 'none';
+            document.getElementById('updateDataTableContainer').innerHTML = ''; // Xóa dữ liệu cũ
+        }
+        function showGitHubFilesForUpdate() {
+            const githubFilesContainer = document.getElementById('githubFilesUpdate');
+            const githubFileSelect = document.getElementById('githubFileSelectUpdate');
+
+            // Hiển thị container
+            githubFilesContainer.style.display = 'block';
+
+            // Gọi GitHub API để lấy danh sách file
+            fetch('https://api.github.com/repos/heo-sieu-doi/quai-kill/contents/')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Lỗi khi gọi GitHub API: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(files => {
+                    githubFileSelect.innerHTML = '<option value="">-- Chọn file --</option>'; // Reset danh sách
+
+                    // Lọc các file Excel và thêm vào dropdown
+                    files
+                        .filter(file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))
+                        .forEach(file => {
+                            const option = document.createElement('option');
+                            option.value = file.download_url; // URL tải file
+                            option.textContent = file.name; // Tên file
+                            githubFileSelect.appendChild(option);
+                        });
+                })
+                .catch(error => {
+                    console.error('Lỗi khi lấy danh sách file từ GitHub:', error);
+                    alert('Không thể lấy danh sách file từ GitHub. Vui lòng thử lại sau.');
+                });
+        }
+
+        function loadGitHubFileForUpdate() {
+            const githubFileSelect = document.getElementById('githubFileSelectUpdate');
+            const selectedFileUrl = githubFileSelect.value;
+
+            if (selectedFileUrl) {
+                // Gán URL file vào ô nhập URL
+                document.getElementById('juneUrl').value = selectedFileUrl;
+
+                // Tự động tải file
+                loadUpdateData(selectedFileUrl);
+            }
+        }
+
+        function loadUpdateData(url) {
+            const statusElement = document.getElementById('juneStatus');
+
+            // Tách biệt phần xử lý URL cho cập nhật dữ liệu
+            const rawUrl = url.trim();
+            let exportUrl = '';
+            const googleSheetRegex = /(?:spreadsheets|file)\/d\/([a-zA-Z0-9-_]+)/;
+            const match = rawUrl.match(googleSheetRegex);
+
+            if (match && match[1]) {
+                const sheetId = match[1];
+                exportUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx`;
+            } else if (rawUrl.toLowerCase().endsWith('.xlsx') || rawUrl.toLowerCase().endsWith('.xls')) {
+                exportUrl = rawUrl;
+            } else {
+                alert("URL không hợp lệ. Vui lòng cung cấp link Google Sheets/File hợp lệ (đã chia sẻ công khai) hoặc link trực tiếp đến file .xlsx.");
+                return;
+            }
+
+            statusElement.textContent = 'Đang tải từ URL...';
+            statusElement.className = 'status';
+            const loading = showLoading(`Đang tải dữ liệu cập nhật...`);
+
+            fetch(exportUrl, { signal: AbortSignal.timeout(30000) })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Lỗi HTTP: ${response.status} ${response.statusText}`);
+                    }
+                    return response.arrayBuffer();
+                })
+                .then(arrayBuffer => {
+                    const data = new Uint8Array(arrayBuffer);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+                    // Hiển thị dữ liệu trong modal
+                    displayUpdateData(jsonData);
+                })
+                .catch(error => {
+                    console.error('Lỗi khi tải dữ liệu cập nhật:', error);
+                    statusElement.textContent = `Lỗi tải dữ liệu: ${error.message}`;
+                    statusElement.className = 'status error';
+                })
+                .finally(() => {
+                    loading.remove();
+                });
+        }
+
+        function saveUpdatedData() {
+            const container = document.getElementById('updateDataTableContainer');
+            const table = container.querySelector('table');
+
+            if (!table) {
+                alert('Không có dữ liệu để lưu.');
+                return;
+            }
+
+            const rows = Array.from(table.querySelectorAll('tr'));
+            const updatedData = rows.map(row => {
+                return Array.from(row.querySelectorAll('td, th')).map(cell => cell.textContent.trim());
+            });
+
+            // Chuyển dữ liệu thành file Excel
+            const worksheet = XLSX.utils.aoa_to_sheet(updatedData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Updated Data');
+
+            // Tải file Excel
+            XLSX.writeFile(workbook, 'Updated_Data.xlsx');
+            alert('Dữ liệu đã được lưu thành công!');
+        }
+        async function showGitHubFilesForUpdate() {
+            const githubFilesContainer = document.getElementById('githubFilesUpdate');
+            const githubFileSelect = document.getElementById('githubFileSelectUpdate');
+
+            // Hiển thị container
+            githubFilesContainer.style.display = 'block';
+
+            // Gọi GitHub API để lấy danh sách file
+            try {
+                const response = await fetch('https://api.github.com/repos/heo-sieu-doi/quai-kill/contents/');
+                if (!response.ok) {
+                    throw new Error(`Lỗi khi gọi GitHub API: ${response.status}`);
+                }
+
+                const files = await response.json();
+                githubFileSelect.innerHTML = '<option value="">-- Chọn file --</option>'; // Reset danh sách
+
+                // Lọc các file Excel và thêm vào dropdown
+                files
+                    .filter(file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))
+                    .forEach(file => {
+                        const option = document.createElement('option');
+                        option.value = file.download_url; // URL tải file
+                        option.textContent = file.name; // Tên file
+                        githubFileSelect.appendChild(option);
+                    });
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách file từ GitHub:', error);
+                alert('Không thể lấy danh sách file từ GitHub. Vui lòng thử lại sau.');
+            }
+        }
+        async function loadGitHubFileForUpdate() {
+            const githubFileSelect = document.getElementById('githubFileSelectUpdate');
+            const selectedFileUrl = githubFileSelect.value;
+
+            if (!selectedFileUrl) {
+                alert('Vui lòng chọn một file từ GitHub.');
+                return;
+            }
+
+            try {
+                const response = await fetch(selectedFileUrl);
+                if (!response.ok) {
+                    throw new Error(`Lỗi khi tải file từ GitHub: ${response.status}`);
+                }
+
+                const arrayBuffer = await response.arrayBuffer();
+                const data = new Uint8Array(arrayBuffer);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                // Hiển thị dữ liệu trong bảng
+                displayEditableData(jsonData);
+            } catch (error) {
+                console.error('Lỗi khi tải file từ GitHub:', error);
+                alert('Không thể tải file từ GitHub. Vui lòng thử lại sau.');
+            }
+        }
+        function displayEditableData(data) {
+            const container = document.getElementById('updateDataTableContainer');
+            container.innerHTML = ''; // Xóa dữ liệu cũ
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p>Không có dữ liệu để hiển thị.</p>';
+                return;
+            }
+
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            // Ánh xạ tiêu đề tiếng Anh sang tiếng Việt
+            const statMapping = {
+                "Enemies captured": "Kẻ Thù Bị Bắt",
+                "Enemies Destroyed Might": "Kẻ Thù Tiêu Diệt",
+                "Enemy Troops Wounded": "Quân Địch Bị Thương",
+                "Troops Killed": "Quân Đội Đã Giết",
+                "Troops Lost": "Số Quân Tổn Thất",
+                "Troops Wounded": "Quân Đội Bị Thương",
+                "Losses": "Thua",
+                "Successful Attacks": "Tấn công Thành công",
+                "Phòng thủ thành công": "Phòng thủ Thành công",
+                "Victories": "Chiến Thắng",
+                "Win Rate": "Tỉ Lệ Chiến Thắng"
+            };
+
+            // Tạo tiêu đề bảng
+            const headerRow = document.createElement('tr');
+            data[0].forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = statMapping[header] || header; // Hiển thị tiếng Việt nếu có, nếu không giữ nguyên
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+
+            // Tạo các hàng dữ liệu
+            data.slice(1).forEach((row, rowIndex) => {
+                const tr = document.createElement('tr');
+                row.forEach((cell, colIndex) => {
+                    const td = document.createElement('td');
+                    td.contentEditable = true; // Cho phép chỉnh sửa
+                    td.textContent = cell || '';
+                    td.dataset.row = rowIndex + 1; // Lưu chỉ số hàng
+                    td.dataset.col = colIndex; // Lưu chỉ số cột
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            container.appendChild(table);
+        }
+        function addNewRow() {
+            const container = document.getElementById('updateDataTableContainer');
+            const table = container.querySelector('table');
+
+            if (!table) {
+                alert('Không có bảng dữ liệu để thêm hàng mới.');
+                return;
+            }
+
+            const tbody = table.querySelector('tbody');
+            const newRow = document.createElement('tr');
+
+            // Thêm các ô trống vào hàng mới
+            const columnCount = table.querySelector('thead tr').children.length;
+            for (let i = 0; i < columnCount; i++) {
+                const td = document.createElement('td');
+                td.contentEditable = true; // Cho phép chỉnh sửa
+                td.textContent = ''; // Nội dung trống
+                newRow.appendChild(td);
+            }
+
+            tbody.appendChild(newRow);
+        }
+        function saveUpdatedData() {
+            const container = document.getElementById('updateDataTableContainer');
+            const table = container.querySelector('table');
+
+            if (!table) {
+                alert('Không có dữ liệu để lưu.');
+                return;
+            }
+
+            const rows = Array.from(table.querySelectorAll('tr'));
+            const updatedData = rows.map(row => {
+                return Array.from(row.querySelectorAll('td, th')).map(cell => cell.textContent.trim());
+            });
+
+            // Chuyển dữ liệu thành file Excel
+            const worksheet = XLSX.utils.aoa_to_sheet(updatedData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Updated Data');
+
+            // Tải file Excel
+            XLSX.writeFile(workbook, 'Updated_Data.xlsx');
+            alert('Dữ liệu đã được lưu thành công!');
+        }
+
+        function showChartModal() {
+            const playerSelect = document.getElementById('playerSelectChart');
+            const playerCompareSelect = document.getElementById('playerCompareChart');
+            playerSelect.innerHTML = ''; // Xóa các lựa chọn cũ
+            playerCompareSelect.innerHTML = ''; // Xóa các lựa chọn cũ
+
+            const eligiblePlayers = currentData.filter(p => p.hasBothData);
+
+            if (eligiblePlayers.length === 0) {
+                alert("Không có người chơi nào có đủ dữ liệu ở cả 2 tháng để vẽ biểu đồ.");
+                return;
+            }
+
+            eligiblePlayers.sort((a, b) => a.name.localeCompare(b.name)); // Sắp xếp theo tên
+
+            // Thêm lựa chọn "Không so sánh" cho dropdown thứ 2
+            const noneOption = document.createElement('option');
+            noneOption.value = ""; // Giá trị rỗng để xác định không chọn
+            noneOption.textContent = "--- Không so sánh ---";
+            playerCompareSelect.appendChild(noneOption);
+
+            // Điền danh sách người chơi vào cả hai dropdown
+            eligiblePlayers.forEach(player => {
+                const option1 = document.createElement('option');
+                option1.value = player.userId;
+                option1.textContent = player.name;
+                playerSelect.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = player.userId;
+                option2.textContent = player.name;
+                playerCompareSelect.appendChild(option2);
+            });
+
+            document.getElementById('chartModal').style.display = 'block';
+            updateChart(); // Vẽ biểu đồ cho người chơi đầu tiên
+        }
+
+        function hideChartModal() {
+            document.getElementById('chartModal').style.display = 'none';
+            if (chartInstance) {
+                chartInstance.destroy();
+                chartInstance = null;
+            }
+        }
+
+        function updateChart() {
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const playerId1 = document.getElementById('playerSelectChart').value;
+            const playerId2 = document.getElementById('playerCompareChart').value;
+
+            const player1 = currentData.find(p => p.userId === playerId1);
+            // Xử lý trường hợp không chọn người chơi 2 (giá trị rỗng)
+            const player2 = playerId2 ? currentData.find(p => p.userId === playerId2) : null;
+
+            if (!player1) return;
+
+            // Cấu hình các chỉ số, màu sắc và trục Y tương ứng
+            // Đồng bộ với 'Biểu đồ so sánh'
+            const statsToChart = [
+                { key: 'enemies_destroyed', label: 'Kẻ Thù Tiêu Diệt', yAxisID: 'y1', color: 'rgba(54, 162, 235, 0.7)' },
+                { key: 'kills', label: 'Kills', yAxisID: 'y', color: 'rgba(75, 192, 192, 0.7)' },
+                { key: 'enemy_wounded', label: 'Quân Địch Bị Thương', yAxisID: 'y', color: 'rgba(255, 206, 86, 0.7)' },
+                { key: 'troops_lost', label: 'Số Quân Tổn Thất', yAxisID: 'y', color: 'rgba(255, 99, 132, 0.7)' }
+            ];
+
+            // Nhãn trên trục X sẽ là tên người chơi
+            const labels = [player1.name];
+            if (player2) {
+                labels.push(player2.name);
+            }
+
+            // Tạo một dataset cho mỗi chỉ số để có thể gán trục Y khác nhau
+            const datasets = statsToChart.map(stat => {
+                const data = [
+                    calculateDifference(player1.julyStats?.[stat.key], player1.juneStats?.[stat.key]) || 0
+                ];
+                if (player2) {
+                    data.push(calculateDifference(player2.julyStats?.[stat.key], player2.juneStats?.[stat.key]) || 0);
+                }
+                return {
+                    label: stat.label,
+                    data: data,
+                    backgroundColor: stat.color, // Sử dụng màu cố định
+                    yAxisID: stat.yAxisID, // Gán trục Y cho toàn bộ dataset này
+                    borderWidth: 1
+                };
+            });
+
+            const ctx = document.getElementById('statsChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: player2 ? `So sánh ${player1.name} và ${player2.name}` : `Biểu đồ ${player1.name}`,
+                            font: { size: 16 }
+                        },
+                        legend: { position: 'top' },
+                        datalabels: {
+                            formatter: (value) => value?.toLocaleString('vi-VN'),
+                            font: { weight: 'bold' },
+                            anchor: 'end',
+                            align: getLabelAlign, // Sử dụng hàm chung
+                            color: (context) => {
+                                const align = getLabelAlign(context);
+                                const value = context.dataset.data[context.dataIndex];
+                                const isInside = (value >= 0 && align === 'bottom') || (value < 0 && align === 'top');
+                                return isInside ? '#fff' : '#444'; // Trắng nếu ở trong, đen nếu ở ngoài
+                            },
+                            offset: 4
+                        }
+                    },
+                    scales: {
+                        x: {
+                            // Đây là trục danh mục (tên người chơi)
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Kills / Bị thương / Tổn thất' },
+                            ticks: { callback: formatVietnameseTick }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: 'Kẻ Thù Tiêu Diệt' },
+                            ticks: { callback: formatVietnameseTick },
+                            grid: { drawOnChartArea: false } // Không vẽ lưới cho trục phụ để đỡ rối
+                        }
+                    }
+                }
+            });
+        }
+
+        function hideOverallComparisonChart() {
+            document.getElementById('overallComparisonChartModal').style.display = 'none';
+            // Hủy các instance biểu đồ để giải phóng bộ nhớ và reset trạng thái
+            overallChartInstances.forEach(c => c.destroy());
+            overallChartInstances = [];
+
+            document.getElementById('overallChartContainer').innerHTML = ''; // Dọn dẹp DOM
+        }
+
+        function showOverallComparisonChart() {
+            const isMobile = window.innerWidth < 768; // Thêm biến kiểm tra màn hình di động
+
+            const container = document.getElementById('overallChartContainer');
+
+            // Clear previous instances before creating new ones
+            overallChartInstances.forEach(c => c.destroy());
+            overallChartInstances = [];
+
+            container.innerHTML = ''; // Xóa các biểu đồ cũ
+
+            const eligiblePlayers = currentData.filter(p => p.hasBothData);
+            if (eligiblePlayers.length === 0) {
+                alert("Không có người chơi nào có đủ dữ liệu ở cả 2 tháng để vẽ biểu đồ.");
+                return;
+            }
+
+            // Sắp xếp theo chênh lệch Kills giảm dần hoặc theo tên
+            if (!window.showMonthlyDataOverall) {
+                eligiblePlayers.sort((a, b) => {
+                    const diffA = calculateDifference(a.julyStats?.kills, a.juneStats?.kills) || 0;
+                    const diffB = calculateDifference(b.julyStats?.kills, b.juneStats?.kills) || 0;
+                    return diffB - diffA;
+                });
+            } else {
+                eligiblePlayers.sort((a, b) => a.name.localeCompare(b.name));
+
+            }
+
+            const statsConfig = [
+                { key: 'enemies_destroyed', label: 'Kẻ Thù Tiêu Diệt', colorJune: 'rgba(54, 162, 235, 0.7)', colorJuly: 'rgba(54, 162, 235, 0.35)', xAxisID: 'x1' },
+                { key: 'kills', label: 'Kills', colorJune: 'rgba(75, 192, 192, 0.7)', colorJuly: 'rgba(75, 192, 192, 0.35)', xAxisID: 'x' },
+                { key: 'enemy_wounded', label: 'Quân Địch Bị Thương', colorJune: 'rgba(255, 206, 86, 0.7)', colorJuly: 'rgba(255, 206, 86, 0.35)', xAxisID: 'x' },
+                { key: 'troops_lost', label: 'Số Quân Tổn Thất', colorJune: 'rgba(255, 99, 132, 0.7)', colorJuly: 'rgba(255, 99, 132, 0.35)', xAxisID: 'x' }
+            ];
+            const chartLabels = statsConfig.map(s => s.label);
+
+            eligiblePlayers.forEach((player, index) => {
+                const playerChartContainer = document.createElement('div');
+                playerChartContainer.style.position = 'relative';
+                playerChartContainer.style.marginBottom = '40px';
+
+                const canvas = document.createElement('canvas');
+                playerChartContainer.appendChild(canvas);
+                container.appendChild(playerChartContainer);
+
+                let chartConfig;
+
+                if (window.showMonthlyDataOverall) {
+                    // Tăng chiều cao cho chế độ xem này vì nó có nhiều dòng và 2 trục X, cần thêm không gian
+                    playerChartContainer.style.height = '350px';
+
+                    // CHẾ ĐỘ 1: Mỗi tháng 1 dòng riêng biệt, có 2 trục giá trị
+                    const labels = [];
+                    const datasets = [];
+                    statsConfig.forEach(stat => {
+                        // Label riêng cho từng tháng
+                        labels.push(`${stat.label} - Tháng ${selectedMonths.june}`);
+                        labels.push(`${stat.label} - Tháng ${selectedMonths.july}`);
+
+                        // Dataset tháng 6 (chỉ có giá trị ở dòng tháng 6, dòng tháng 7 null)
+                        datasets.push({
+                            label: `${stat.label} - Tháng ${selectedMonths.june}`,
+                            data: labels.map(l => l === `${stat.label} - Tháng ${selectedMonths.june}` ? (player.juneStats?.[stat.key] || 0) : null),
+                            backgroundColor: 'rgba(59, 130, 246, 0.75)', // Xanh dương cho tháng 6
+                            barPercentage: 0.8,
+                            xAxisID: stat.xAxisID
+                        });
+
+                        // Dataset tháng 7 (chỉ có giá trị ở dòng tháng 7, dòng tháng 6 null)
+                        datasets.push({
+                            label: `${stat.label} - Tháng ${selectedMonths.july}`,
+                            data: labels.map(l => l === `${stat.label} - Tháng ${selectedMonths.july}` ? (player.julyStats?.[stat.key] || 0) : null),
+                            backgroundColor: 'rgba(234, 88, 12, 0.75)', // Cam cho tháng 7
+                            barPercentage: 0.8,
+                            xAxisID: stat.xAxisID
+                        });
+                    });
+
+                    chartConfig = {
+                        type: 'bar',
+                        data: { labels, datasets },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: `${index + 1}. ${player.name}`,
+                                    align: 'start',
+                                    font: { size: isMobile ? 14 : 16, weight: 'bold' }, // Giảm cỡ chữ tiêu đề trên di động
+                                    padding: { bottom: 10 }
+                                },
+                                legend: { display: false }, // legend không cần vì label đã có tháng
+                                tooltip: {
+                                    callbacks: {
+                                        label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.x?.toLocaleString('vi-VN')}`
+                                    }
+                                },
+                                datalabels: {
+                                    anchor: 'end',
+                                    formatter: (value) => value?.toLocaleString('vi-VN'),
+                                    font: {
+                                        weight: 'bold',
+                                        size: isMobile ? 11 : 13 // Giảm cỡ chữ chỉ số trên di động
+                                    },
+                                    align: getLabelAlign,
+                                    color: (context) => {
+                                        return getLabelAlign(context) === 'start' ? '#fff' : '#333';
+                                    },
+                                    offset: 4
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    type: 'linear',
+                                    position: 'bottom',
+                                    title: { display: true, text: 'Kills / Bị thương / Tổn thất' },
+                                    ticks: { callback: formatVietnameseTick }
+                                },
+                                x1: {
+                                    type: 'linear',
+                                    position: 'top',
+                                    title: { display: true, text: 'Kẻ Thù Tiêu Diệt' },
+                                    grid: { drawOnChartArea: false },
+                                    ticks: { callback: formatVietnameseTick }
+                                },
+                                y: {
+                                    stacked: true // Chồng các dataset lên nhau để kiểm soát chiều cao thanh
+                                }
+                            }
+                        }
+                    };
+                }
+
+
+                else {
+                    // CHẾ ĐỘ 2: Tổng chênh lệch (giữ nguyên)
+                    // Giữ nguyên chiều cao gốc cho chế độ xem này
+                    playerChartContainer.style.height = '350px';
+
+                    chartConfig = {
+                        type: 'bar',
+                        data: {
+                            labels: chartLabels,
+                            datasets: statsConfig.map((stat, i) => ({
+                                label: stat.label,
+                                data: chartLabels.map((_, j) => i === j ? (calculateDifference(player.julyStats?.[stat.key], player.juneStats?.[stat.key]) || 0) : null),
+                                backgroundColor: (context) => {
+                                    const value = context.dataset.data[context.dataIndex];
+                                    if (value === null || value === undefined) return 'transparent';
+                                    // Logic màu: Xanh lá cho chỉ số tốt, đỏ cho chỉ số xấu
+                                    // Riêng 'Số Quân Tổn Thất' thì ngược lại
+                                    if (stat.key === 'troops_lost') {
+                                        return value > 0 ? 'rgba(255, 99, 132, 0.7)' : 'rgba(75, 192, 192, 0.7)';
+                                    }
+                                    return value >= 0 ? 'rgba(75, 192, 192, 0.7)' : 'rgba(255, 99, 132, 0.7)';
+                                },
+                                barPercentage: 0.8,
+                                xAxisID: stat.xAxisID
+                            }))
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: { display: true, text: `${index + 1}. ${player.name}`, align: 'start', font: { size: isMobile ? 13 : 15, weight: 'bold' }, padding: { bottom: 5 } },
+                                legend: { display: false },
+                                tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.x.toLocaleString('vi-VN')}` } },
+                                datalabels: {
+                                    anchor: 'end',
+                                    formatter: (value) => value?.toLocaleString('vi-VN'),
+                                    font: {
+                                        size: isMobile ? 11 : 13, // Giảm cỡ chữ chỉ số trên di động
+                                        weight: 'bold'
+                                    },
+                                    align: getLabelAlign,
+                                    color: (context) => {
+                                        if (getLabelAlign(context) === 'start') {
+                                            return '#fff'; // White when inside
+                                        }
+                                        const value = context.dataset.data[context.dataIndex];
+                                        if (value > 0) return 'green';
+                                        if (value < 0) return 'red';
+                                        return '#666';
+                                    },
+                                    offset: 4
+                                }
+                            },
+                            scales: {
+                                x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Kills / Bị thương / Tổn thất' }, ticks: { callback: formatVietnameseTick } },
+                                x1: { type: 'linear', position: 'top', title: { display: true, text: 'Kẻ Thù Tiêu Diệt' }, grid: { drawOnChartArea: false }, ticks: { callback: formatVietnameseTick } },
+                                y: {
+                                    stacked: true // Áp dụng stacked để kiểm soát bố cục và chiều cao thanh
+                                }
+                            }
+                        }
+                    };
+                }
+
+                const chart = new Chart(canvas.getContext('2d'), chartConfig);
+                overallChartInstances.push(chart); // Store instance for PDF export
+            });
+
+            document.getElementById('overallComparisonChartModal').style.display = 'block';
+        }
+        function updateOcrLimitInfo(headers) {
+            const remaining = headers.get('X-RateLimit-Remaining');
+            const resetTimestamp = headers.get('X-RateLimit-Reset');
+            const limitInfoElement = document.getElementById('ocrLimitInfo');
+
+            if (remaining !== null && resetTimestamp !== null && limitInfoElement) {
+                const resetDate = new Date(parseInt(resetTimestamp, 10) * 1000);
+                const formattedDate = resetDate.toLocaleString('vi-VN', {
+                    hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric'
+                });
+                limitInfoElement.innerHTML = `Lượt OCR còn lại: <strong>${remaining}</strong>. Sẽ làm mới lúc: <strong>${formattedDate}</strong>.`;
+            }
+        }
+
+        async function handleImageUpload(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const statusElement = document.getElementById(`${type}Status`);
+            statusElement.textContent = 'Đang xử lý ảnh OCR...';
+            statusElement.className = 'status';
+            const loading = showLoading('Đang đọc dữ liệu từ ảnh...');
+
+            try {
+                // QUAN TRỌNG: Thay 'YOUR_API_KEY_HERE' bằng API key của bạn
+                const apiKey = 'K87066619788957';
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('apikey', apiKey);
+                formData.append('language', 'eng'); // Sử dụng tiếng Anh theo yêu cầu
+                formData.append('isOverlayRequired', false);
+                formData.append('OCREngine', '2'); // Sử dụng OCR Engine 2 để nhận dạng số và ký tự đặc biệt tốt hơn
+                formData.append('isTable', 'true'); // Bật chế độ nhận dạng bảng
+                formData.append('scale', 'true'); // Tự động phóng to ảnh DPI thấp
+
+                const response = await fetch('https://api.ocr.space/parse/image', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                // Cập nhật thông tin giới hạn API
+                updateOcrLimitInfo(response.headers);
+
+                if (!response.ok) {
+                    throw new Error(`Lỗi API OCR: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+
+                if (result.IsErroredOnProcessing || !result.ParsedResults || result.ParsedResults.length === 0) {
+                    throw new Error(`Lỗi xử lý OCR: ${result.ErrorMessage?.join(', ') || 'Không nhận dạng được văn bản.'}`);
+                }
+
+                const parsedText = result.ParsedResults[0].ParsedText;
+                const playerData = parseOcrText(parsedText);
+
+                // Hiển thị kết quả trong một bảng riêng biệt để người dùng xác nhận
+                displayOcrResult(playerData);
+                statusElement.textContent = `Đã nhận dạng xong ảnh. Vui lòng kiểm tra và thêm dữ liệu.`;
+                statusElement.className = 'status success';
+
+            } catch (error) {
+                console.error('Lỗi xử lý ảnh OCR:', error);
+                statusElement.textContent = `Lỗi: ${error.message}`;
+                statusElement.className = 'status error';
+                alert(`Đã xảy ra lỗi khi xử lý ảnh: ${error.message}`);
+            } finally {
+                loading.remove();
+            }
+        }
+
+        // Hiển thị kết quả OCR ban đầu (sau ảnh 1)
+        function displayOcrResult(playerData) {
+            // Nếu không có tên, userId sẽ trống để người dùng tự nhập.
+            tempOcrData = playerData; // Lưu dữ liệu tạm thời
+
+            populateOcrTable(playerData); // Hiển thị dữ liệu trong bảng
+
+            // Cấu hình modal cho lần tải ảnh đầu tiên
+            document.getElementById('mergeOcrBtn').style.display = 'inline-block';
+            document.getElementById('ocrCopySection').style.display = 'none';
+            document.getElementById('ocrResultModal').style.display = 'block';
+        }
+
+        // Hàm cập nhật chuỗi Excel và cảnh báo khi dữ liệu OCR thay đổi
+        function updateOcrMergedDataDisplay() {
+            if (!tempOcrData) return;
+            // Tái tạo chuỗi Excel và hiển thị lại
+            const excelString = generateExcelRowString(tempOcrData);
+            document.getElementById('ocrCopyText').value = excelString;
+        }
+
+        // Đổ dữ liệu OCR vào bảng trong modal
+        function populateOcrTable(playerData) {
+            const table = document.getElementById('ocrResultTable');
+            table.innerHTML = ''; // Xóa nội dung cũ
+            const statDisplayOrder = [
+                { key: 'name', label: 'Tên' },
+                { key: 'userId', label: 'User ID' },
+                { key: 'rank', label: 'Rank' },
+                { key: 'might', label: 'Might' },
+                { key: 'kills', label: 'Kills' },
+                { key: 'enemies_captured', label: 'Kẻ Thù Bị Bắt' },
+                { key: 'enemies_destroyed', label: 'Kẻ Thù Tiêu Diệt' },
+                { key: 'enemy_wounded', label: 'Quân Địch Bị Thương' },
+                { key: 'troops_killed', label: 'Quân Đội Đã Giết' },
+                { key: 'troops_lost', label: 'Số Quân Tổn Thất' },
+                { key: 'troops_wounded', label: 'Quân Đội Bị Thương' },
+                { key: 'losses', label: 'Thua' },
+                { key: 'successful_attacks', label: 'Tấn công Thành công' },
+                { key: 'successful_defenses', label: 'Phòng thủ Thành công' },
+                { key: 'victories', label: 'Chiến Thắng' },
+                { key: 'win_rate', label: 'Tỉ Lệ Chiến Thắng' }
+            ];
+
+            statDisplayOrder.forEach(stat => {
+                const value = playerData[stat.key]
+                const row = table.insertRow();
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                cell1.style.fontWeight = 'bold';
+                cell1.textContent = stat.label;
+
+                // Cho phép chỉnh sửa tất cả các trường
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.style.width = '95%';
+                input.value = (value !== undefined && value !== null) ? value : '';
+
+                input.addEventListener('input', (e) => {
+                    const newValue = e.target.value;
+                    // Cập nhật tempOcrData
+                    if (stat.key === 'name' || stat.key === 'rank' || stat.key === 'win_rate' || stat.key === 'userId') {
+                        tempOcrData[stat.key] = newValue;
+                    } else {
+                        tempOcrData[stat.key] = parseInt(newValue.replace(/[^0-9]/g, ''), 10) || 0;
+                    }
+                    updateOcrMergedDataDisplay(); // Cập nhật chuỗi Excel khi có thay đổi
+                });
+                cell2.appendChild(input);
+            });
+        }
+
+        // Xử lý khi đóng modal OCR
+        function hideOcrResultModal() {
+            document.getElementById('ocrResultModal').style.display = 'none';
+            tempOcrData = null; // Xóa dữ liệu tạm
+            // Reset lại trạng thái của modal cho lần sử dụng tiếp theo
+            document.getElementById('mergeOcrBtn').style.display = 'inline-block';
+            document.getElementById('ocrCopySection').style.display = 'none';
+        }
+
+        // Thêm dữ liệu đã xác nhận vào bảng so sánh
+        function addOcrDataToComparison(type) {
+            if (!tempOcrData) return;
+            const dataStore = (type === 'june') ? juneData : julyData;
+            dataStore[tempOcrData.userId] = tempOcrData;
+            alert(`Đã thêm dữ liệu của "${tempOcrData.name}" vào Tháng ${type === 'june' ? selectedMonths.june : selectedMonths.july}.`);
+            compareData(); // Cập nhật lại bảng chính
+            hideOcrResultModal();
+        }
+
+        // Xử lý tải ảnh thứ 2
+        async function handleSecondImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file || !tempOcrData) return;
+
+            const loading = showLoading('Đang đọc dữ liệu từ ảnh thứ 2...');
+
+            try {
+                const apiKey = 'K87066619788957';
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('apikey', apiKey);
+                formData.append('language', 'eng');
+                formData.append('OCREngine', '2');
+                formData.append('isTable', 'true');
+                formData.append('scale', 'true');
+
+                const response = await fetch('https://api.ocr.space/parse/image', { method: 'POST', body: formData });
+                // Cập nhật thông tin giới hạn API
+                updateOcrLimitInfo(response.headers);
+
+                if (!response.ok) throw new Error(`Lỗi API OCR: ${response.statusText}`);
+
+                const result = await response.json();
+                if (result.IsErroredOnProcessing || !result.ParsedResults || result.ParsedResults.length === 0) {
+                    throw new Error(`Lỗi xử lý OCR: ${result.ErrorMessage?.join(', ') || 'Không nhận dạng được văn bản.'}`);
+                }
+
+                const parsedText = result.ParsedResults[0].ParsedText;
+                const newData = parseOcrText(parsedText);
+
+                // Gộp dữ liệu mới vào dữ liệu tạm thời
+                tempOcrData = mergeOcrData(tempOcrData, newData);
+
+                // Hiển thị kết quả đã gộp
+                displayMergedOcrResult(tempOcrData);
+
+            } catch (error) {
+                console.error('Lỗi xử lý ảnh OCR thứ 2:', error);
+                alert(`Đã xảy ra lỗi khi xử lý ảnh thứ 2: ${error.message}`);
+            } finally {
+                loading.remove();
+                event.target.value = ''; // Reset input để có thể chọn lại file cũ
+            }
+        }
+
+        // Gộp dữ liệu từ hai lần OCR
+        function mergeOcrData(existingData, newData) {
+            const merged = { ...existingData };
+            const allKeys = new Set([...Object.keys(existingData), ...Object.keys(newData)]);
+
+            allKeys.forEach(key => {
+                const newValue = newData[key];
+                const isNewValueValid = (newValue !== undefined && newValue !== 0 && newValue !== '0%' && newValue !== 'Không tìm thấy tên' && newValue !== 'N/A');
+
+                if (isNewValueValid) {
+                    merged[key] = newValue; // Ưu tiên dữ liệu mới nếu nó hợp lệ (khác 0, khác mặc định)
+                }
+            });
+            return merged;
+        }
+
+        // Hiển thị kết quả cuối cùng sau khi gộp
+        function displayMergedOcrResult(mergedData) {
+            populateOcrTable(mergedData); // Cập nhật lại bảng với dữ liệu đã gộp
+
+            // Ẩn nút gộp và hiện khu vực sao chép
+            document.getElementById('mergeOcrBtn').style.display = 'none';
+            const copySection = document.getElementById('ocrCopySection');
+            copySection.style.display = 'block';
+
+            // Tạo chuỗi để dán vào Excel và hiển thị
+            const excelString = generateExcelRowString(mergedData);
+            document.getElementById('ocrCopyText').value = excelString;
+
+            // Kiểm tra các chỉ số bị thiếu và cảnh báo
+            const missingStats = [];
+            STATS_CONFIG.forEach(stat => {
+                if (!mergedData[stat.key]) { // Kiểm tra nếu chỉ số bằng 0 hoặc không tồn tại
+                    missingStats.push(stat.name);
+                }
+            });
+
+            const warningElement = document.getElementById('ocrMissingWarning');
+            if (missingStats.length > 0) {
+                warningElement.textContent = `Lưu ý: Các chỉ số sau có thể bị thiếu hoặc bằng 0: ${missingStats.join(', ')}.`;
+                warningElement.style.display = 'block';
+            } else {
+                warningElement.style.display = 'none';
+            }
+        }
+
+        // Tạo chuỗi dữ liệu để dán vào Excel
+        function generateExcelRowString(playerData) {
+            const excelColumnKeys = [
+                'name', 'userId', 'rank', 'might', 'kills', 'enemies_captured', 'enemies_destroyed',
+                'enemy_wounded', 'troops_killed', 'troops_lost', 'troops_wounded', 'losses',
+                'successful_attacks', 'successful_defenses', 'victories', 'win_rate'
+            ];
+            const textKeys = ['name', 'userId', 'rank', 'win_rate'];
+
+            const values = excelColumnKeys.map(key => {
+                let value = playerData[key];
+                if (value === undefined || value === null) {
+                    return textKeys.includes(key) ? '' : 0;
+                }
+                return value;
+            });
+            return values.join('\t');
+        }
+
+        // Sao chép văn bản vào clipboard
+        function copyOcrTextToClipboard() {
+            const textArea = document.getElementById('ocrCopyText');
+            textArea.select();
+            textArea.setSelectionRange(0, 99999); // Cho thiết bị di động
+            try {
+                document.execCommand('copy');
+                alert('Đã sao chép vào clipboard!');
+            } catch (err) {
+                alert('Lỗi! Không thể sao chép. Vui lòng sao chép thủ công.');
+            }
+        }
+
+        function parseOcrText(ocrText) {
+            // Hàm này được thiết kế lại để "dịch" văn bản từ ảnh theo định dạng mới.
+            // Nó có thể xử lý cả tiếng Việt và tiếng Anh cho các chỉ số.
+            const stats = {};
+            const lines = ocrText.split(/[\r\n]+/); // Tách văn bản thành các dòng
+
+            // Hàm trợ giúp để chuyển chuỗi số (vd: "1,234,567" hoặc "194.132.153") thành số nguyên
+            const parseNumber = (str) => {
+                if (!str) return 0;
+                // Xóa tất cả các ký tự không phải là số
+                const cleanedStr = str.replace(/[^0-9]/g, '');
+                return parseInt(cleanedStr, 10) || 0;
+            };
+
+            // Hàm trợ giúp để trích xuất giá trị số dựa trên danh sách các từ khóa có thể có
+            const extractValue = (keywords) => {
+                if (!Array.isArray(keywords)) keywords = [keywords]; // Đảm bảo keywords là một mảng
+                for (const line of lines) {
+                    for (const keyword of keywords) {
+                        // Biểu thức chính quy tìm từ khóa, theo sau là khoảng trắng và một con số
+                        // Ví dụ: "Chiến thắng   27,808"
+                        const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const regex = new RegExp(`^${escapedKeyword}\\s+([\\d,.]+)`, 'i');
+                        const match = line.trim().match(regex);
+                        if (match && match[1]) {
+                            return parseNumber(match[1]);
+                        }
+                    }
+                }
+                return 0; // Trả về 0 nếu không tìm thấy
+            };
+
+            // 1. Tìm và trích xuất Tên, Might, và Kills dựa vào bố cục đặc thù
+            let nameLineIndex = -1;
+            for (let i = 0; i < lines.length; i++) {
+                // Tên người chơi thường nằm trên dòng có dạng: "#123 [TAG]Name"
+                if (lines[i].match(/#\d+\s+\[/)) {
+                    nameLineIndex = i;
+                    break;
+                }
+            }
+
+            if (nameLineIndex !== -1) {
+                // Trích xuất tên từ dòng đã tìm thấy
+                const nameMatch = lines[nameLineIndex].match(/#\d+\s+(.*)/);
+                if (nameMatch && nameMatch[1]) {
+                    stats.name = nameMatch[1].trim();
+                }
+
+                // Might và Kills thường nằm ở dòng ngay sau dòng tên
+                if (nameLineIndex + 1 < lines.length) {
+                    const statsLine = lines[nameLineIndex + 1].trim();
+                    // Tách dòng bằng khoảng trắng để lấy 2 giá trị đầu tiên
+                    const parts = statsLine.split(/\s+/);
+                    if (parts.length >= 2) {
+                        stats.might = parseNumber(parts[0]);
+                        stats.kills = parseNumber(parts[1]);
+                    }
+                }
+            }
+
+            // 2. Trích xuất các chỉ số còn lại bằng từ khóa (hỗ trợ cả tiếng Việt và tiếng Anh)
+            stats.victories = extractValue(['Chiến thắng', 'Victories']);
+            stats.losses = extractValue(['Thua', 'Losses']);
+            stats.successful_attacks = extractValue(['Các Cuộc Tấn Công Thành Công', 'Successful Attacks']);
+            stats.successful_defenses = extractValue(['Phòng Thủ Thành Công', 'Successful Defenses', 'Phòng thủ thành công']);
+            stats.troops_killed = extractValue(['Quân đội đã giết', 'Troops Killed']);
+            stats.troops_lost = extractValue(['Số Quân Tổn Thất', 'Troops Lost']);
+            stats.troops_wounded = extractValue(['Quân đội bị thương', 'Troops Wounded']);
+            // Xử lý lỗi OCR phổ biến "Bì Thươna" -> "Bị Thương"
+            stats.enemy_wounded = extractValue(['Quân Địch Bì Thươn', 'Quân Địch Bị Thương', 'Enemy Troops Wounded']);
+            stats.enemies_captured = extractValue(['Kẻ Thù Bị Bắt', 'Enemies captured']);
+            stats.enemies_destroyed = extractValue(['Kẻ thù đã tiêu diệt (Sức mạnh)', 'Kẻ Thù Tiêu Diệt', 'Enemies Destroyed Might']);
+
+            // 3. Xử lý riêng cho Tỉ lệ thắng (dạng chuỗi %)
+            const winRateRegex = /(?:Tỉ Lệ Chiến Thắng|Win Rate)\s+([\d.,]+%)/i;
+            const winRateMatch = ocrText.match(winRateRegex);
+            if (winRateMatch && winRateMatch[1]) {
+                stats.win_rate = winRateMatch[1];
+            }
+
+            // 4. Đặt giá trị mặc định cho các trường còn thiếu để đảm bảo dữ liệu nhất quán
+            const allStatKeys = DEFAULT_STATS_CONFIG.map(s => s.key);
+            allStatKeys.push('win_rate', 'rank', 'name', 'might', 'kills');
+
+            for (const key of allStatKeys) {
+                // Chỉ gán giá trị nếu nó được tìm thấy. Nếu không, để là undefined.
+                // Điều này cho phép ô nhập liệu trong modal trống để người dùng tự điền.
+                if (stats[key] === undefined || stats[key] === 0 || stats[key] === '0%') {
+                     if (key !== 'name' && key !== 'userId') { // Giữ lại tên và userId nếu có
+                        stats[key] = undefined;
+                     }
+                }
+            }
+            return stats;
+        }
+
+        function showExportResultModal(images) {
+            const modal = document.getElementById('exportResultModal');
+            const container = document.getElementById('exportResultContainer');
+            container.innerHTML = '';
+
+            const currentMonth = new Date().getMonth() + 1;
+
+            images.forEach((dataUrl, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.style.width = '100%';
+                
+                const label = document.createElement('p');
+                label.textContent = `Ảnh ${index + 1}`;
+                label.style.fontWeight = 'bold';
+                label.style.margin = '5px 0';
+                
+                const img = document.createElement('img');
+                img.src = dataUrl;
+                img.style.maxWidth = '100%';
+                img.style.border = '1px solid #ccc';
+                img.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+                
+                // Nút mở tab mới (thay thế nút tải xuống)
+                const openBtn = document.createElement('button');
+                openBtn.textContent = 'Mở ảnh trong Tab mới (Để lưu)';
+                openBtn.className = 'secondary';
+                openBtn.style.marginTop = '10px';
+                openBtn.onclick = function() {
+                    const newWindow = window.open();
+                    if (newWindow) {
+                        newWindow.document.write(`
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <title>Ảnh xuất ${index + 1}</title>
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <style>body{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background-color:#f0f0f0;}img{max-width:100%;height:auto;box-shadow:0 0 10px rgba(0,0,0,0.2);}p{font-family:sans-serif;margin-bottom:10px;color:#333;text-align:center;padding:10px;}</style>
+                            </head>
+                            <body>
+                                <p>Nhấn giữ vào ảnh bên dưới để lưu vào thư viện ảnh.</p>
+                                <img src="${dataUrl}" alt="Ảnh xuất">
+                            </body>
+                            </html>`);
+                        newWindow.document.close();
+                    } else {
+                        alert("Trình duyệt đã chặn cửa sổ bật lên. Vui lòng kiểm tra cài đặt và thử lại.");
+                    }
+                };
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(img);
+                wrapper.appendChild(document.createElement('div')); // Spacer
+                wrapper.appendChild(openBtn);
+                
+                container.appendChild(wrapper);
+            });
+
+            modal.style.display = 'block';
+        }
+
+        function closeExportResultModal() {
+            document.getElementById('exportResultModal').style.display = 'none';
+            document.getElementById('exportResultContainer').innerHTML = '';
+        }
+    </script>
+</body>
+
+</html>
