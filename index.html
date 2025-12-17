@@ -1091,17 +1091,14 @@
                 max-width: 80%;
             }
             
-            /* Chia thanh công cụ modal thành 2 dòng */
-            #telegramModal .utility-tabs {
-                flex-direction: column !important;
+            /* Mobile: Xếp dọc phần điều khiển Telegram */
+            .telegram-controls-wrapper {
+                flex-direction: column;
                 align-items: flex-start !important;
-                gap: 10px !important;
-                height: auto !important;
-                padding-bottom: 10px;
             }
-            #telegramModal .utility-tabs > div {
+            .telegram-actions-group {
                 width: 100%;
-                justify-content: space-between;
+                justify-content: space-between; /* Căn đều các nút hành động */
             }
         }
 
@@ -1759,6 +1756,34 @@
             background-color: #eef2f5;
             border-radius: 3px;
         }
+
+        /* === THÊM MỚI: CSS riêng cho bố cục Telegram Modal 3 phần === */
+        .telegram-controls-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--light-gray);
+            margin-bottom: 10px;
+            flex-shrink: 0; /* Không bị co lại khi màn hình nhỏ */
+            gap: 10px;
+        }
+        .telegram-tabs-group {
+            display: flex;
+            gap: 5px;
+        }
+        .telegram-actions-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        /* Đảm bảo modal body chiếm phần còn lại và cuộn */
+        #telegramModal .modal-body {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-top: 5px;
+        }
     </style>
 </head>
 
@@ -2122,22 +2147,27 @@
     <!-- === THÊM MỚI: Modal Telegram Events === -->
     <div id="telegramModal" class="modal-overlay">
         <div class="modal-container" style="max-width: 700px; height: 80vh;">
+            <!-- PHẦN 1: TIÊU ĐỀ -->
             <div class="modal-header">
                 <h2>📅 Cập nhật Lords Mobile</h2>
                 <button class="modal-close-btn" onclick="closeTelegramModal()">&times;</button>
             </div>
-            <div class="utility-tabs" style="justify-content: space-between; align-items: center; padding-right: 10px;">
-                <div style="display: flex; gap: 5px;">
+            
+            <!-- PHẦN 2: CÁC NÚT ĐIỀU KHIỂN (Events, News, Refresh, Stats) -->
+            <div class="telegram-controls-wrapper">
+                <div class="telegram-tabs-group">
                     <button class="tab-btn active" onclick="switchTelegramChannel('LMEvents')" data-channel="LMEvents">Events</button>
                     <button class="tab-btn" onclick="switchTelegramChannel('lmnews')" data-channel="lmnews">News</button>
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="telegram-actions-group">
                     <span id="telegramCountdown" style="font-size: 13px; font-weight: bold; color: var(--danger-color);"></span>
                     <span id="telegramLastUpdate" style="font-size: 12px; color: #999; font-style: italic;"></span>
                     <button onclick="switchTelegramChannel(currentTelegramChannel, true)" style="background: none; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 13px; padding: 5px 10px; color: var(--dark-gray);" title="Tải lại dữ liệu mới nhất">🔄 Làm mới</button>
                     <button onclick="toggleHellStats()" style="background: none; border: 1px solid #3498db; border-radius: 4px; cursor: pointer; font-size: 13px; padding: 5px 10px; color: #3498db; font-weight: bold;" title="Phân tích các Hell Event đang hiển thị">📊 Thống kê Hell</button>
                 </div>
             </div>
+
+            <!-- PHẦN 3: NỘI DUNG TIN NHẮN -->
             <div class="modal-body">
                 <!-- Khu vực hiển thị thống kê -->
                 <div id="hellStatsPanel" class="stats-panel"></div>
@@ -5014,7 +5044,7 @@
             currentTelegramChannel = channelId;
             
             // Cập nhật giao diện Tab
-            document.querySelectorAll('#telegramModal .tab-btn').forEach(btn => {
+            document.querySelectorAll('.telegram-tabs-group .tab-btn').forEach(btn => {
                 if (btn.getAttribute('data-channel') === channelId) {
                     btn.classList.add('active');
                 } else {
