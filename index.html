@@ -850,7 +850,6 @@
             .header {
                 flex-direction: column;
                 align-items: stretch;
-                gap: 15px;
                 /* Các item chiếm đủ chiều rộng */
                 padding: 15px;
             }
@@ -863,32 +862,6 @@
             .header-stat {
                 margin-left: 0;
                 margin-top: 15px;
-                width: 100%; /* Full width */
-                box-sizing: border-box;
-            }
-
-            /* === FIX LỖI VỠ GIAO DIỆN: Xếp dọc các input và nút chọn file === */
-            .input-actions-group {
-                flex-direction: column;
-                width: 100%;
-                align-items: stretch;
-                gap: 15px;
-            }
-
-            .file-upload-controls {
-                flex-direction: column;
-                width: 100%;
-                align-items: stretch;
-            }
-
-            .file-upload-group {
-                width: 100%;
-            }
-
-            .upload-label {
-                width: 100%;
-                justify-content: center;
-                box-sizing: border-box; /* Đảm bảo padding không làm tràn */
             }
 
             /* === THÊM MỚI: Tối ưu dropdown và actions trên mobile === */
@@ -920,6 +893,10 @@
                 width: 100%;
             }
 
+            .input-actions-group {
+                justify-content: center;
+                /* Căn giữa các control */
+            }
 
             .input-group {
                 max-width: none;
@@ -936,13 +913,7 @@
             /* Tối ưu nhóm cài đặt trên mobile */
             .settings-group {
                 justify-content: space-between;
-                flex-wrap: wrap; /* Cho phép xuống dòng nếu màn hình quá bé */
                 width: 100%;
-                gap: 10px;
-            }
-            
-            .input-group-compact {
-                flex-grow: 1; /* Tự động giãn ra cho đều */
             }
 
             /* === THÊM MỚI: Responsive cho ô tìm kiếm === */
@@ -973,7 +944,6 @@
             .btn {
                 /* Đảm bảo các nút toolbar chiếm đủ rộng */
                 width: auto; /* Để grid tự xử lý chiều rộng */
-                min-height: 40px; /* Tăng chiều cao nút để dễ bấm cảm ứng */
                 box-sizing: border-box;
                 height: 100%; /* Đảm bảo chiều cao các nút bằng nhau */
             }
@@ -1020,7 +990,7 @@
             }
 
             .header h1 {
-                font-size: 1.4em; /* Giảm thêm chút nữa */
+                font-size: 1.6em;
                 /* Giảm nữa */
             }
 
@@ -1036,11 +1006,10 @@
 
             th,
             td {
-                padding: 6px 2px; /* Giảm padding tối đa */
-                font-size: 11px; /* Font nhỏ hơn để vừa màn hình */
+                padding: 8px 10px;
+                padding: 6px 4px; /* Giảm padding cell thêm chút nữa */
+                font-size: 13px;
                 /* Giảm font chữ bảng */
-                white-space: normal; /* Cho phép xuống dòng tên dài */
-                word-break: break-word;
             }
 
             .target-input {
@@ -1061,11 +1030,6 @@
             /* Xếp dọc ô nhập URL trên màn hình rất nhỏ */
             .input-group {
                 flex-direction: column;
-            }
-            
-            /* Ẩn bớt cột không quan trọng trên màn hình siêu nhỏ nếu cần */
-            .level-column {
-                min-width: 25px;
             }
             .input-group button {
                 width: 100%;
