@@ -910,6 +910,26 @@
                 justify-content: center;
                 width: 100%;
             }
+            
+            /* === FIX: Countdown nằm ngang trên mobile === */
+            .countdown-group {
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr); /* Chia 4 cột đều nhau */
+                gap: 5px !important;
+                align-items: start !important;
+            }
+            .countdown-group .time-input-group {
+                width: 100%;
+            }
+            .countdown-group .time-input-group input {
+                width: 100% !important; /* Input chiếm hết ô grid */
+                padding: 8px 2px !important;
+                min-width: 0; /* Tránh vỡ layout flex/grid */
+            }
+            .countdown-group button {
+                grid-column: 1 / -1; /* Nút chiếm trọn hàng dưới */
+                width: 100%;
+            }
 
             /* Toolbar Mobile */
             .toolbar {
@@ -1059,6 +1079,30 @@
 
             /* Ẩn chi tiết điểm để tiết kiệm không gian header */
             .hunt-breakdown { display: none; }
+        }
+        
+        /* === FIX: Modal Telegram trên Mobile === */
+        @media (max-width: 768px) {
+            #telegramModal .modal-header h2 {
+                font-size: 1.2em; /* Giảm cỡ chữ tiêu đề */
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 80%;
+            }
+            
+            /* Chia thanh công cụ modal thành 2 dòng */
+            #telegramModal .utility-tabs {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 10px !important;
+                height: auto !important;
+                padding-bottom: 10px;
+            }
+            #telegramModal .utility-tabs > div {
+                width: 100%;
+                justify-content: space-between;
+            }
         }
 
         /* Màn hình điện thoại nhỏ */
@@ -5436,7 +5480,8 @@
             
             // Bảng Hell Event
             html += `<h4 style="margin: 10px 0 5px; color: #e67e22;">🔥 Hell Events (${totalHellEvents})</h4>`;
-            html += `<table class="stats-table">
+            // === FIX: Thêm wrapper table-responsive để không bị tràn ===
+            html += `<div class="table-responsive"><table class="stats-table">
                         <thead>
                             <tr>
                                 <th>Loại Hell</th>
@@ -5471,12 +5516,12 @@
                 }
             });
             if (totalHellEvents === 0) html += `<tr><td colspan="3" style="text-align:center; font-style:italic;">Không tìm thấy Hell Event nào.</td></tr>`;
-            html += `</tbody></table>`;
+            html += `</tbody></table></div>`;
 
             // Bảng Challenge (nếu có)
             if (totalChallenges > 0) {
                 html += `<h4 style="margin: 15px 0 5px; color: #9b59b6;">🏆 24H Challenge (${totalChallenges})</h4>`;
-                html += `<table class="stats-table">
+                html += `<div class="table-responsive"><table class="stats-table">
                             <thead>
                                 <tr>
                                     <th>Loại Thử thách</th>
@@ -5509,7 +5554,7 @@
                                 </tr>`;
                     }
                 });
-                html += `</tbody></table>`;
+                html += `</tbody></table></div>`;
             }
             
             html += `</tbody></table>`;
