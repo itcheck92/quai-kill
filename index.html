@@ -843,197 +843,227 @@
         /* Màn hình nhỏ hơn (Tablet dọc & Điện thoại lớn) */
         @media (max-width: 768px) {
             .main-container {
-                padding: 0 15px;
-                /* Giảm padding */
+                padding: 0 10px;
+                margin-top: 10px;
             }
 
             .header {
                 flex-direction: column;
                 align-items: stretch;
-                /* Các item chiếm đủ chiều rộng */
                 padding: 15px;
+                gap: 15px;
             }
 
             .title-wrapper {
                 text-align: center;
-                /* Căn giữa tiêu đề */
+                margin-bottom: 5px;
+            }
+
+            .title-wrapper h1 {
+                font-size: 1.5em;
+                white-space: normal;
             }
 
             .header-stat {
                 margin-left: 0;
-                margin-top: 15px;
-            }
-
-            /* === THÊM MỚI: Tối ưu dropdown và actions trên mobile === */
-            .actions-group {
-                display: grid;
-                grid-template-columns: 1fr 1fr; /* Chia thành 2 cột đều nhau */
-                gap: 10px;
                 width: 100%;
-            }
-
-            .dropdown {
-                width: 100%;
-                grid-column: 1 / -1; /* Dropdown chiếm trọn hàng đầu tiên */
-            }
-
-            .dropdown-content {
-                position: static; /* Bỏ position absolute, hiển thị như block bình thường */
-                box-shadow: none; /* Bỏ shadow */
-                border: none;
-                border-top: 1px solid var(--light-gray); /* Thêm đường kẻ trên để phân cách */
-                width: 100%;
-                margin-top: 8px; /* Thêm khoảng cách với nút cha */
-                background-color: #fdfdfd; /* Nền sáng hơn chút để phân biệt */
-                border-radius: 0; /* Bỏ bo góc trên mobile */
-            }
-
-            /* Đảm bảo nút toggle trong dropdown full width */
-            .dropdown .btn-toggle {
-                width: 100%;
+                box-sizing: border-box;
+                margin-top: 0;
             }
 
             .input-actions-group {
-                justify-content: center;
-                /* Căn giữa các control */
-            }
-
-            .input-group {
-                max-width: none;
-                /* Cho phép input URL rộng hơn */
-            }
-
-            .toolbar {
+                width: 100%;
                 flex-direction: column;
                 align-items: stretch;
-                /* Nút chiếm đủ rộng */
                 gap: 10px;
             }
 
-            /* Tối ưu nhóm cài đặt trên mobile */
-            .settings-group {
-                justify-content: space-between;
+            .input-group {
                 width: 100%;
+                max-width: none;
+                flex-direction: column;
+            }
+            
+            .input-group button {
+                width: 100%;
+                margin-top: 5px;
             }
 
-            /* === THÊM MỚI: Responsive cho ô tìm kiếm === */
-            .search-group {
-                order: -1;
-                /* Đưa ô tìm kiếm lên đầu */
+            .url-input {
                 width: 100%;
-                margin-right: 0;
-                margin-bottom: 5px;
-                /* Thêm khoảng cách dưới */
+                box-sizing: border-box;
             }
 
-            /* === KẾT THÚC THÊM MỚI === */
-            .tab {
-                margin-left: 0;
-                /* Bỏ margin khi xếp dọc */
+            .file-upload-controls {
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+            }
+
+            .file-upload-group, .upload-label {
                 width: 100%;
                 justify-content: center;
-                /* Căn giữa các nút tab */
-            }
-
-            .tab button {
-                flex-grow: 1;
-                /* Các nút tab chia đều không gian */
-                text-align: center;
-            }
-
-            .btn {
-                /* Đảm bảo các nút toolbar chiếm đủ rộng */
-                width: auto; /* Để grid tự xử lý chiều rộng */
                 box-sizing: border-box;
-                height: 100%; /* Đảm bảo chiều cao các nút bằng nhau */
-            }
-
-            .download-btn {
-                margin-top: 5px;
-                /* Thêm khoảng cách nhỏ */
-            }
-
-            .chart-grid {
-                /* Grid tự động xếp thành 1 cột vì minmax(250px, 1fr) */
-                gap: 20px;
-                /* Giảm gap */
-            }
-
-            .chart-section {
-                padding: 20px;
-                /* Giảm padding */
             }
 
             .countdown-group {
+                justify-content: center;
                 width: 100%;
-                /* Chiếm đủ rộng trên mobile */
-                max-width: none;
             }
 
-            #countdownDisplay {
-                text-align: center;
-                /* Căn giữa trên mobile */
-                margin-top: 15px;
+            /* Toolbar Mobile */
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .search-group {
+                width: 100%;
+                order: -1;
+            }
+
+            #searchInput {
+                width: 100%;
+            }
+
+            .settings-group {
+                width: 100%;
+                justify-content: space-between;
+                background: #fff;
+                padding: 10px;
+                border-radius: var(--border-radius-md);
+                box-shadow: var(--box-shadow-light);
+                box-sizing: border-box;
+            }
+
+            .actions-group {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                width: 100%;
+            }
+
+            .actions-group .dropdown {
+                grid-column: 1 / -1;
+                width: 100%;
+            }
+
+            .dropdown-content {
+                position: static;
+                box-shadow: none;
+                border: 1px solid var(--light-gray);
+                width: 100%;
+                margin-top: 5px;
+                background-color: #f9f9f9;
+                box-sizing: border-box;
+            }
+
+            .actions-group .dropdown .btn-toggle {
+                width: 100%;
+            }
+
+            .actions-group .btn {
+                width: 100%;
+                padding: 10px 5px;
+                font-size: 13px;
+            }
+
+            .tab {
+                width: 100%;
+                margin-left: 0;
+                flex-wrap: wrap;
+            }
+
+            .tab button {
+                flex: 1;
+                min-width: 80px;
+                padding: 10px 5px;
+                font-size: 13px;
+            }
+
+            /* Chart Mobile */
+            .chart-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .chart-section {
+                padding: 15px;
             }
 
             /* Modal full width trên mobile */
             .modal-container {
                 width: 95%;
+                max-height: 90vh;
                 padding: 15px;
+                margin: 0;
+            }
+
+            /* Sections Mobile */
+            .debt-checker-controls, 
+            .hell-event-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .debt-checker-controls .btn, 
+            .hell-event-controls .btn,
+            .hell-event-controls select, 
+            .hell-event-controls input {
+                width: 100%;
+                margin-bottom: 8px;
+                box-sizing: border-box;
+            }
+            
+            .debt-checker-controls textarea {
+                max-width: none;
+            }
+
+            .energy-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .utility-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 5px;
+                justify-content: flex-start;
+            }
+            
+            .utility-tabs .tab-btn {
+                flex: 0 0 auto;
             }
         }
 
         /* Màn hình điện thoại nhỏ */
         @media (max-width: 480px) {
-            .main-container {
-                padding: 0 10px;
-            }
-
             .header h1 {
-                font-size: 1.6em;
-                /* Giảm nữa */
-            }
-
-            .btn {
-                padding: 8px 10px;
-                /* Giảm padding nút */
-                font-size: 12px;
+                font-size: 1.3em;
             }
 
             .tab button {
-                padding: 8px 10px;
+                font-size: 12px;
+                padding: 8px 2px;
             }
 
             th,
             td {
-                padding: 8px 10px;
-                padding: 6px 4px; /* Giảm padding cell thêm chút nữa */
-                font-size: 13px;
-                /* Giảm font chữ bảng */
+                padding: 8px 4px;
+                font-size: 12px;
             }
 
             .target-input {
-                width: 55px;
-                /* Giảm nữa */
-                font-size: 13px;
+                width: 40px;
+                padding: 5px;
             }
 
-            .chart-section h2 {
-                font-size: 1.4em;
+            .actions-group {
+                grid-template-columns: 1fr;
             }
 
-            /* Tối ưu hiển thị thống kê header */
-            .header-stat .stat-value {
-                font-size: 1.4em;
-            }
-
-            /* Xếp dọc ô nhập URL trên màn hình rất nhỏ */
-            .input-group {
-                flex-direction: column;
-            }
-            .input-group button {
-                width: 100%;
-                margin-top: 5px;
+            .energy-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
