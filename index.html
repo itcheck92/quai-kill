@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏹 Hệ Thống Quản Lý Săn Quái</title>
+    <title>Hệ Thống Quản Lý Săn Quái FvN</title>
     <!-- Thêm vào phần head -->
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
@@ -866,13 +866,15 @@
 
             /* === THÊM MỚI: Tối ưu dropdown và actions trên mobile === */
             .actions-group {
-                flex-direction: column;
+                display: grid;
+                grid-template-columns: 1fr 1fr; /* Chia thành 2 cột đều nhau */
+                gap: 10px;
                 width: 100%;
-                align-items: stretch; /* Đảm bảo các item con cũng giãn ra */
             }
 
             .dropdown {
-                width: 100%; /* Đảm bảo dropdown container chiếm đủ rộng */
+                width: 100%;
+                grid-column: 1 / -1; /* Dropdown chiếm trọn hàng đầu tiên */
             }
 
             .dropdown-content {
@@ -884,6 +886,11 @@
                 margin-top: 8px; /* Thêm khoảng cách với nút cha */
                 background-color: #fdfdfd; /* Nền sáng hơn chút để phân biệt */
                 border-radius: 0; /* Bỏ bo góc trên mobile */
+            }
+
+            /* Đảm bảo nút toggle trong dropdown full width */
+            .dropdown .btn-toggle {
+                width: 100%;
             }
 
             .input-actions-group {
@@ -901,6 +908,12 @@
                 align-items: stretch;
                 /* Nút chiếm đủ rộng */
                 gap: 10px;
+            }
+
+            /* Tối ưu nhóm cài đặt trên mobile */
+            .settings-group {
+                justify-content: space-between;
+                width: 100%;
             }
 
             /* === THÊM MỚI: Responsive cho ô tìm kiếm === */
@@ -930,8 +943,9 @@
 
             .btn {
                 /* Đảm bảo các nút toolbar chiếm đủ rộng */
-                width: 100%;
+                width: auto; /* Để grid tự xử lý chiều rộng */
                 box-sizing: border-box;
+                height: 100%; /* Đảm bảo chiều cao các nút bằng nhau */
             }
 
             .download-btn {
@@ -961,6 +975,12 @@
                 /* Căn giữa trên mobile */
                 margin-top: 15px;
             }
+
+            /* Modal full width trên mobile */
+            .modal-container {
+                width: 95%;
+                padding: 15px;
+            }
         }
 
         /* Màn hình điện thoại nhỏ */
@@ -975,9 +995,9 @@
             }
 
             .btn {
-                padding: 10px 15px;
+                padding: 8px 10px;
                 /* Giảm padding nút */
-                font-size: 13px;
+                font-size: 12px;
             }
 
             .tab button {
@@ -987,7 +1007,7 @@
             th,
             td {
                 padding: 8px 10px;
-                /* Giảm padding cell */
+                padding: 6px 4px; /* Giảm padding cell thêm chút nữa */
                 font-size: 13px;
                 /* Giảm font chữ bảng */
             }
@@ -1000,6 +1020,20 @@
 
             .chart-section h2 {
                 font-size: 1.4em;
+            }
+
+            /* Tối ưu hiển thị thống kê header */
+            .header-stat .stat-value {
+                font-size: 1.4em;
+            }
+
+            /* Xếp dọc ô nhập URL trên màn hình rất nhỏ */
+            .input-group {
+                flex-direction: column;
+            }
+            .input-group button {
+                width: 100%;
+                margin-top: 5px;
             }
         }
 
@@ -1416,6 +1450,216 @@
             color: var(--dark-gray);
             margin-left: 8px;
         }
+        /* === THÊM MỚI: CSS cho Tabs trong Modal === */
+        .utility-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--light-gray);
+            margin-bottom: 20px;
+            gap: 5px;
+        }
+        .utility-tabs .tab-btn {
+            padding: 10px 15px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--dark-gray);
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        .utility-tabs .tab-btn:hover {
+            color: var(--primary-color);
+            background-color: #f8f9fa;
+        }
+        .utility-tabs .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        .utility-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        .utility-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* === THÊM MỚI: CSS cho Telegram Feed === */
+        .telegram-feed-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 10px;
+        }
+        .telegram-post {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #eef2f5;
+            position: relative;
+        }
+        .telegram-post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 8px;
+        }
+        .telegram-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            background-color: #3498db;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .telegram-meta {
+            font-size: 12px;
+            color: #999;
+        }
+        .telegram-content {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+            word-wrap: break-word;
+        }
+        /* Sửa lại CSS ảnh để không ảnh hưởng icon/emoji */
+        .telegram-single-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: block;
+        }
+        /* CSS cho Album ảnh (nhiều ảnh) */
+        .telegram-media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .telegram-media-item {
+            aspect-ratio: 1;
+            background-size: cover;
+            background-position: center;
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+        /* === THÊM MỚI: CSS cho Video và Sticker === */
+        .telegram-video-thumb {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 10px 0;
+            cursor: pointer;
+            display: block;
+        }
+        .telegram-video-thumb img {
+            width: 100%;
+            display: block;
+        }
+        .telegram-video-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 40px;
+            color: rgba(255,255,255,0.8);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .telegram-forwarded {
+            font-size: 12px;
+            color: #3498db;
+            margin-bottom: 5px;
+            padding-left: 8px;
+            border-left: 2px solid #3498db;
+        }
+        /* === THÊM MỚI: CSS cho Zoom Ảnh === */
+        .image-zoom-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000; /* Cao hơn modal telegram */
+            cursor: zoom-out;
+        }
+        .image-zoom-overlay.active {
+            display: flex;
+        }
+        .image-zoom-content {
+            max-width: 90%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            cursor: default;
+        }
+        .image-zoom-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 2001;
+        }
+        /* Thêm cursor pointer cho ảnh trong feed */
+        .telegram-single-image, .telegram-media-item {
+            cursor: zoom-in;
+        }
+        /* === THÊM MỚI: CSS cho Bảng Thống Kê Hell === */
+        .stats-panel {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: none; /* Ẩn mặc định */
+            animation: fadeIn 0.3s;
+        }
+        .stats-panel.active {
+            display: block;
+        }
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        .stats-table th, .stats-table td {
+            padding: 8px;
+            border-bottom: 1px solid #dee2e6;
+            text-align: left;
+        }
+        .stats-table th { background-color: #e9ecef; color: #495057; }
+        /* === THÊM MỚI: Style cho điểm số click được === */
+        .clickable-point {
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .clickable-point:hover {
+            color: #2980b9;
+            background-color: #eef2f5;
+            border-radius: 3px;
+        }
     </style>
 </head>
 
@@ -1424,7 +1668,7 @@
     <!-- Header giữ nguyên -->
     <div class="header">
         <div class="title-wrapper">
-            <h1>🏹 Quản Lý Săn Quái</h1>
+            <h1>🏹 Quản Lý Săn Quái FvN</h1>
         </div>
         <!-- === THÊM MỚI: Hiển thị tổng điểm === -->
         <div class="header-stat">
@@ -1530,6 +1774,7 @@
                         <button class="btn btn-secondary" onclick="openPointConfigModal()" style="width: 100%; margin-top: 8px;">⚙️ Cấu hình điểm</button>
                     </div>
                 </div>
+                <button class="btn btn-info" onclick="openTelegramModal()">📅 Lịch Events</button>
                 <button class="btn btn-export export-image-btn" onclick="exportToImage()">📸 Xuất Ảnh</button>
                 <button class="btn btn-primary" onclick="showPointCalculatorModal()">🧮 Tính Điểm</button>
             </div>
@@ -1604,94 +1849,6 @@
         </div>
         <!-- === KẾT THÚC THÊM MỚI === -->
 
-        <!-- === THÊM MỚI: Công cụ tính Hell Event === -->
-        <div class="hell-event-calculator-section">
-            <h2>🔥 Công Cụ Tính Điểm Hell Event</h2>
-            <div class="hell-event-controls">
-                <select id="hellEventType" onchange="toggleHellOptions()">
-                    <option value="pact">Hell Khế Ước</option>
-                    <option value="maze">Hell Mê Hồn Trận</option>
-                    <option value="troop">Hell Lính</option>
-                </select>
-                <input type="number" id="hellPointsTarget" placeholder="Nhập tổng điểm hell cần ăn...">
-                <button class="btn btn-primary" onclick="calculateHellEvent()">Tính toán</button>
-                <!-- Thêm tùy chọn cho Hell Khế Ước -->
-                <div id="pactSpeedOptions">
-                    <span>Tốc độ kết hợp (%): </span>
-                    <input type="number" id="pactSpeed" placeholder="Ví dụ: 391.1" value="391.1">
-                </div>
-                <!-- Thêm tùy chọn cho Hell Khế Ước -->
-                <div id="pactOptions">
-                    <span>Dùng khế: </span>
-                    <label><input type="checkbox" class="pact-option" value="pact4" checked> Khế 4</label>
-                    <label><input type="checkbox" class="pact-option" value="pact3" checked> Khế 3</label>
-                    <label><input type="checkbox" class="pact-option" value="pact2" checked> Khế 2</label>
-                    <label><input type="checkbox" class="pact-option" value="pact1" checked> Khế 1</label>
-                </div>
-                <!-- Thêm tùy chọn cho Hell Lính -->
-                <div id="troopOptions">
-                    <span>Dùng lính: </span>
-                    <label><input type="checkbox" class="troop-option" value="t4" checked> T4</label>
-                    <label><input type="checkbox" class="troop-option" value="t3" checked> T3</label>
-                    <label><input type="checkbox" class="troop-option" value="t2" checked> T2</label>
-                    <label><input type="checkbox" class="troop-option" value="t1" checked> T1</label>
-                </div>
-                <!-- === THÊM MỚI: Tùy chọn chi tiết cho Hell Lính === -->
-                <div id="troopExtraOptions">
-                    <span>Loại T4: </span>
-                    <select id="t4TroopType" class="url-input">
-                        <option value="archer">Cung</option>
-                        <option value="cavalry">Kỵ</option>
-                        <option value="infantry">Bộ</option>
-                    </select>
-                    <span>Tốc độ huấn luyện (%): </span>
-                    <input type="number" id="trainingSpeed" placeholder="Ví dụ: 522.38" value="522.38"
-                        class="url-input">
-                </div>
-                <!-- === KẾT THÚC THÊM MỚI === -->
-            </div>
-            <div id="hellResults" style="display: none;">
-                <!-- Kết quả tính toán sẽ hiển thị ở đây -->
-            </div>
-        </div>
-        <!-- === KẾT THÚC THÊM MỚI === -->
-
-        <!-- === THÊM MỚI: Công cụ tính Năng Lượng Săn Quái === -->
-        <div class="energy-calculator-section">
-            <h2>⚡ Công Cụ Tính Năng Lượng Săn Quái</h2>
-            <div class="energy-grid">
-                <div class="energy-input-group">
-                    <label for="energy1k">1k NL x</label>
-                    <input type="number" id="energy1k" placeholder="0" min="0">
-                </div>
-                <div class="energy-input-group">
-                    <label for="energy2k">2k NL x</label>
-                    <input type="number" id="energy2k" placeholder="0" min="0">
-                </div>
-                <div class="energy-input-group">
-                    <label for="energy5k">5k NL x</label>
-                    <input type="number" id="energy5k" placeholder="0" min="0">
-                </div>
-                <div class="energy-input-group">
-                    <label for="energy10k">10k NL x</label>
-                    <input type="number" id="energy10k" placeholder="0" min="0">
-                </div>
-                <div class="energy-input-group">
-                    <label for="energy20k">20k NL x</label>
-                    <input type="number" id="energy20k" placeholder="0" min="0">
-                </div>
-                <div class="energy-input-group">
-                    <label for="energy50k">50k NL x</label>
-                    <input type="number" id="energy50k" placeholder="0" min="0">
-                </div>
-            </div>
-            <div style="text-align: center;">
-                <button class="btn btn-primary" onclick="calculateEnergy()">Tính Tổng</button>
-            </div>
-            <div id="energyResults" style="display: none;"></div>
-        </div>
-        <!-- === KẾT THÚC THÊM MỚI === -->
-
         <!-- === THÊM MỚI: Bảng Xếp Hạng Nạp === -->
         <div class="purchase-leaderboard-section">
             <h2>💎 Bảng Xếp Hạng Nạp</h2>
@@ -1759,37 +1916,145 @@
 
     <!-- === THÊM MỚI: Modal Tính Điểm === -->
     <div id="pointCalculatorModal" class="modal-overlay">
-        <div class="modal-container" style="max-width: 400px;">
+        <div class="modal-container" style="max-width: 600px;">
             <div class="modal-header">
-                <h2>Công cụ Tính Điểm</h2>
+                <h2>Công cụ Tiện ích</h2>
                 <button class="modal-close-btn" onclick="closePointCalculatorModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <div style="margin-bottom: 15px;">
-                    <label for="calcTotalPoints" style="display: block; margin-bottom: 5px; font-weight: bold;">Tổng điểm mục tiêu:</label>
-                    <input type="text" id="calcTotalPoints" placeholder="Ví dụ: 10,000,000" oninput="formatNumberInput(this)" class="url-input" style="width: 100%; box-sizing: border-box;">
+                <div class="utility-tabs">
+                    <button class="tab-btn active" onclick="switchUtilityTab('calc-basic')">Tính Cơ Bản</button>
+                    <button class="tab-btn" onclick="switchUtilityTab('calc-hell')">Tính Hell Event</button>
+                    <button class="tab-btn" onclick="switchUtilityTab('calc-energy')">Tính Năng Lượng</button>
                 </div>
-                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <div style="flex: 1;">
-                        <label for="calcPointsPerAction" style="display: block; margin-bottom: 5px; font-weight: bold;">Điểm Kiếm được (1 lần):</label>
-                        <input type="text" id="calcPointsPerAction" placeholder="VD: 600" oninput="formatNumberInput(this)" class="url-input" style="width: 100%; box-sizing: border-box;">
+
+                <!-- Tab 1: Cơ bản -->
+                <div id="calc-basic" class="utility-content active">
+                    <div style="margin-bottom: 15px;">
+                        <label for="calcTotalPoints" style="display: block; margin-bottom: 5px; font-weight: bold;">Tổng điểm mục tiêu:</label>
+                        <input type="text" id="calcTotalPoints" placeholder="Ví dụ: 10,000,000" oninput="formatNumberInput(this)" class="url-input" style="width: 100%; box-sizing: border-box;">
                     </div>
-                    <div style="flex: 1;">
-                        <label for="calcCostPerAction" style="display: block; margin-bottom: 5px; font-weight: bold;">Chi phí mỗi lần (Tùy chọn):</label>
-                        <input type="text" id="calcCostPerAction" placeholder="VD: 1 (Hell) hoặc 1,000 (NL)" oninput="formatNumberInput(this)" class="url-input" style="width: 100%; box-sizing: border-box;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <div style="flex: 1;">
+                            <label for="calcPointsPerAction" style="display: block; margin-bottom: 5px; font-weight: bold;">Điểm Kiếm được (1 lần):</label>
+                            <input type="text" id="calcPointsPerAction" placeholder="VD: 600" oninput="formatNumberInput(this)" class="url-input" style="width: 100%; box-sizing: border-box;">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="calcCostPerAction" style="display: block; margin-bottom: 5px; font-weight: bold;">Chi phí mỗi lần (Tùy chọn):</label>
+                            <input type="text" id="calcCostPerAction" placeholder="VD: 1 (Hell) hoặc 1,000 (NL)" oninput="formatNumberInput(this)" class="url-input" style="width: 100%; box-sizing: border-box;">
+                        </div>
+                    </div>
+                    <button onclick="calculateItemsNeeded()" class="btn btn-primary" style="width: 100%;">Tính toán</button>
+                    
+                    <div id="calcResult" style="margin-top: 20px; padding: 15px; background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 4px; display: none; text-align: center;">
+                        <p style="margin: 0; color: var(--text-color);">Kết quả tính toán:</p>
+                        <div style="margin: 10px 0;">
+                            <span style="display: block; font-size: 14px;">Số lần thực hiện: <strong id="calcActionCount">0</strong></span>
+                            <span style="display: block; font-size: 18px; font-weight: bold; color: var(--success-color); margin-top: 5px;">Tổng cần thiết: <span id="calcTotalCost">0</span></span>
+                        </div>
                     </div>
                 </div>
-                <button onclick="calculateItemsNeeded()" class="btn btn-primary" style="width: 100%;">Tính toán</button>
-                
-                <div id="calcResult" style="margin-top: 20px; padding: 15px; background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 4px; display: none; text-align: center;">
-                    <p style="margin: 0; color: var(--text-color);">Kết quả tính toán:</p>
-                    <div style="margin: 10px 0;">
-                        <span style="display: block; font-size: 14px;">Số lần thực hiện: <strong id="calcActionCount">0</strong></span>
-                        <span style="display: block; font-size: 18px; font-weight: bold; color: var(--success-color); margin-top: 5px;">Tổng cần thiết: <span id="calcTotalCost">0</span></span>
+
+                <!-- Tab 2: Hell Event -->
+                <div id="calc-hell" class="utility-content">
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div style="display: flex; gap: 10px;">
+                            <select id="hellEventType" onchange="toggleHellOptions()" class="url-input" style="flex: 1;">
+                                <option value="pact">Hell Khế Ước</option>
+                                <option value="maze">Hell Mê Hồn Trận</option>
+                                <option value="troop">Hell Lính</option>
+                            </select>
+                            <input type="text" id="hellPointsTarget" placeholder="Nhập điểm mục tiêu..." class="url-input" style="flex: 1;" oninput="formatNumberInput(this)">
+                        </div>
+
+                        <div id="hellOptionsContainer">
+                            <div id="pactSpeedOptions" style="display: none; align-items: center; gap: 10px; justify-content: center;">
+                                <span style="font-size: 14px;">Tốc độ (%): </span>
+                                <input type="number" id="pactSpeed" value="391.1" class="url-input" style="width: 80px; text-align: center;">
+                            </div>
+                            <div id="pactOptions" style="display: none; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 10px;">
+                                <label><input type="checkbox" class="pact-option" value="pact4" checked> Khế 4</label>
+                                <label><input type="checkbox" class="pact-option" value="pact3" checked> Khế 3</label>
+                                <label><input type="checkbox" class="pact-option" value="pact2" checked> Khế 2</label>
+                                <label><input type="checkbox" class="pact-option" value="pact1" checked> Khế 1</label>
+                            </div>
+                            <div id="troopOptions" style="display: none; flex-wrap: wrap; gap: 15px; justify-content: center;">
+                                <label><input type="checkbox" class="troop-option" value="t4" checked> T4</label>
+                                <label><input type="checkbox" class="troop-option" value="t3" checked> T3</label>
+                                <label><input type="checkbox" class="troop-option" value="t2" checked> T2</label>
+                                <label><input type="checkbox" class="troop-option" value="t1" checked> T1</label>
+                            </div>
+                            <div id="troopExtraOptions" style="display: none; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 10px;">
+                                <select id="t4TroopType" class="url-input" style="width: auto;">
+                                    <option value="archer">Cung</option>
+                                    <option value="cavalry">Kỵ</option>
+                                    <option value="infantry">Bộ</option>
+                                </select>
+                                <div style="display: flex; align-items: center; gap: 5px;">
+                                    <span style="font-size: 14px;">Tốc độ (%):</span>
+                                    <input type="number" id="trainingSpeed" value="522.38" class="url-input" style="width: 80px; text-align: center;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" onclick="calculateHellEvent()" style="width: 100%;">Tính toán</button>
+                        <div id="hellResults" style="display: none; padding: 15px; background: #f9fafb; border-radius: 4px; border: 1px solid #eee; font-size: 14px;"></div>
                     </div>
+                </div>
+
+                <!-- Tab 3: Energy -->
+                <div id="calc-energy" class="utility-content">
+                    <div class="energy-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-bottom: 15px;">
+                        <div class="energy-input-group" style="justify-content: center;"><label for="energy1k">1k</label><input type="number" id="energy1k" placeholder="0" min="0" style="width: 40px;"></div>
+                        <div class="energy-input-group" style="justify-content: center;"><label for="energy2k">2k</label><input type="number" id="energy2k" placeholder="0" min="0" style="width: 40px;"></div>
+                        <div class="energy-input-group" style="justify-content: center;"><label for="energy5k">5k</label><input type="number" id="energy5k" placeholder="0" min="0" style="width: 40px;"></div>
+                        <div class="energy-input-group" style="justify-content: center;"><label for="energy10k">10k</label><input type="number" id="energy10k" placeholder="0" min="0" style="width: 40px;"></div>
+                        <div class="energy-input-group" style="justify-content: center;"><label for="energy20k">20k</label><input type="number" id="energy20k" placeholder="0" min="0" style="width: 40px;"></div>
+                        <div class="energy-input-group" style="justify-content: center;"><label for="energy50k">50k</label><input type="number" id="energy50k" placeholder="0" min="0" style="width: 40px;"></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="calculateEnergy()" style="width: 100%;">Tính Tổng</button>
+                    <div id="energyResults" style="display: none; margin-top: 15px; padding: 15px; background: #f9fafb; border-radius: 4px; border: 1px solid #eee; text-align: center;"></div>
                 </div>
             </div>
         </div>
+    </div>
+    <!-- === KẾT THÚC THÊM MỚI === -->
+
+    <!-- === THÊM MỚI: Modal Telegram Events === -->
+    <div id="telegramModal" class="modal-overlay">
+        <div class="modal-container" style="max-width: 700px; height: 80vh;">
+            <div class="modal-header">
+                <h2>📅 Cập nhật Lords Mobile</h2>
+                <button class="modal-close-btn" onclick="closeTelegramModal()">&times;</button>
+            </div>
+            <div class="utility-tabs" style="justify-content: space-between; align-items: center; padding-right: 10px;">
+                <div style="display: flex; gap: 5px;">
+                    <button class="tab-btn active" onclick="switchTelegramChannel('LMEvents')" data-channel="LMEvents">Events</button>
+                    <button class="tab-btn" onclick="switchTelegramChannel('lmnews')" data-channel="lmnews">News</button>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="telegramCountdown" style="font-size: 13px; font-weight: bold; color: var(--danger-color);"></span>
+                    <span id="telegramLastUpdate" style="font-size: 12px; color: #999; font-style: italic;"></span>
+                    <button onclick="switchTelegramChannel(currentTelegramChannel, true)" style="background: none; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 13px; padding: 5px 10px; color: var(--dark-gray);" title="Tải lại dữ liệu mới nhất">🔄 Làm mới</button>
+                    <button onclick="toggleHellStats()" style="background: none; border: 1px solid #3498db; border-radius: 4px; cursor: pointer; font-size: 13px; padding: 5px 10px; color: #3498db; font-weight: bold;" title="Phân tích các Hell Event đang hiển thị">📊 Thống kê Hell</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <!-- Khu vực hiển thị thống kê -->
+                <div id="hellStatsPanel" class="stats-panel"></div>
+                
+                <div id="telegramFeedContent">
+                    <div style="text-align: center; padding: 20px;">Đang tải dữ liệu...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- === KẾT THÚC THÊM MỚI === -->
+
+    <!-- === THÊM MỚI: Modal Zoom Ảnh === -->
+    <div id="imageZoomModal" class="image-zoom-overlay" onclick="closeImageZoom()">
+        <span class="image-zoom-close">&times;</span>
+        <img class="image-zoom-content" id="zoomedImage">
     </div>
     <!-- === KẾT THÚC THÊM MỚI === -->
 
@@ -1811,6 +2076,7 @@
         // === THÊM MỚI: Biến cho Countdown ===
         let countdownIntervalId = null;
         let countdownTargetTimestamp = null;
+        let shouldReopenTelegramModal = false; // Biến cờ để mở lại modal Telegram
         // === KẾT THÚC THÊM MỚI ===        
         // === CẤU HÌNH ĐIỂM QUÁI ===
         // Đổi từ const sang let để có thể thay đổi
@@ -4046,7 +4312,7 @@
             const targetPointsInput = document.getElementById('hellPointsTarget');
             const resultsDiv = document.getElementById('hellResults');
 
-            const targetPoints = parseInt(targetPointsInput.value);
+            const targetPoints = parseInt(targetPointsInput.value.replace(/[^0-9]/g, ''));
 
             if (isNaN(targetPoints) || targetPoints <= 0) {
                 alert("Vui lòng nhập một số điểm hợp lệ.");
@@ -4516,6 +4782,34 @@
             document.getElementById('calcTotalPoints').value = '';
             document.getElementById('calcPointsPerAction').value = '';
             document.getElementById('calcCostPerAction').value = '';
+
+            // Mở lại modal Telegram nếu trước đó nó bị đóng tự động
+            if (shouldReopenTelegramModal) {
+                openTelegramModal();
+                shouldReopenTelegramModal = false;
+            }
+        }
+        
+        // === THÊM MỚI: Hàm chuyển tab trong Modal Tiện ích ===
+        function switchUtilityTab(tabId) {
+            // Ẩn tất cả nội dung
+            document.querySelectorAll('.utility-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            // Bỏ active tất cả nút
+            document.querySelectorAll('.utility-tabs .tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Hiện nội dung được chọn
+            document.getElementById(tabId).classList.add('active');
+            // Active nút được chọn
+            document.querySelector(`.utility-tabs .tab-btn[onclick="switchUtilityTab('${tabId}')"]`).classList.add('active');
+
+            // Xử lý riêng cho tab Hell để hiển thị đúng options
+            if (tabId === 'calc-hell') {
+                toggleHellOptions();
+            }
         }
 
         function formatNumberInput(input) {
@@ -4598,6 +4892,622 @@
             }
             closePointConfigModal();
             alert("Đã lưu cấu hình điểm và cập nhật bảng!");
+        }
+
+        // === THÊM MỚI: Logic lấy tin từ Telegram ===
+        let currentTelegramChannel = 'LMEvents';
+        const telegramCache = { LMEvents: null, lmnews: null }; // Cache: { html: string, timestamp: number }
+        const CACHE_DURATION = 5 * 60 * 1000; // 5 phút (tính bằng mili giây)
+        let telegramCountdownInterval = null; // Biến lưu interval đếm ngược
+
+        function openTelegramModal() {
+            document.getElementById('telegramModal').classList.add('active');
+            switchTelegramChannel(currentTelegramChannel);
+        }
+
+        function closeTelegramModal() {
+            document.getElementById('telegramModal').classList.remove('active');
+            // Dừng đếm ngược khi đóng modal để tiết kiệm tài nguyên
+            if (telegramCountdownInterval) clearInterval(telegramCountdownInterval);
+        }
+
+        function switchTelegramChannel(channelId, forceRefresh = false) {
+            currentTelegramChannel = channelId;
+            
+            // Cập nhật giao diện Tab
+            document.querySelectorAll('#telegramModal .tab-btn').forEach(btn => {
+                if (btn.getAttribute('data-channel') === channelId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            const container = document.getElementById('telegramFeedContent');
+            const lastUpdateSpan = document.getElementById('telegramLastUpdate');
+
+            // Kiểm tra Cache thông minh
+            const cache = telegramCache[channelId];
+            const now = Date.now();
+            
+            // Nếu có cache VÀ (không ép làm mới) VÀ (cache chưa hết hạn 5 phút)
+            if (cache && !forceRefresh && (now - cache.timestamp < CACHE_DURATION)) {
+                container.innerHTML = cache.html;
+                updateLastUpdateTimeDisplay(cache.latestLabel || 'Từ bộ nhớ đệm');
+                // Khởi động lại đếm ngược dựa trên thời gian bài viết mới nhất trong cache
+                if (cache.latestPostTime) startTelegramCountdown(cache.latestPostTime);
+                return;
+            }
+
+            container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--dark-gray);"><p>⏳ Đang kết nối đến Telegram...</p></div>';
+            document.getElementById('telegramCountdown').textContent = ''; // Xóa đếm ngược cũ
+            lastUpdateSpan.textContent = 'Đang cập nhật...';
+
+            if (channelId === 'LMEvents') {
+                loadLMEventsData();
+            } else {
+                loadLMNewsData();
+            }
+        }
+
+        function updateLastUpdateTimeDisplay(text) {
+            document.getElementById('telegramLastUpdate').textContent = text;
+        }
+
+        // === THÊM MỚI: Hàm xử lý đếm ngược tự động ===
+        function startTelegramCountdown(lastPostDateString) {
+            if (telegramCountdownInterval) clearInterval(telegramCountdownInterval);
+            
+            const countdownElem = document.getElementById('telegramCountdown');
+            if (!lastPostDateString) {
+                countdownElem.textContent = '';
+                return;
+            }
+
+            const lastPostTime = new Date(lastPostDateString).getTime();
+            // Thời gian dự kiến tiếp theo = Thời gian bài cuối + 60 phút
+            let nextUpdateTime = lastPostTime + (60 * 60 * 1000); 
+
+            // === FIX LỖI LOOP: Xử lý khi đã quá giờ mà chưa có bài mới ===
+            const now = Date.now();
+            let isOverdue = false;
+            
+            if (nextUpdateTime <= now) {
+                // Nếu thời gian dự kiến đã trôi qua, nghĩa là chưa có bài mới.
+                // Thiết lập kiểm tra lại sau 30 giây thay vì refresh ngay lập tức (gây loop).
+                nextUpdateTime = now + 30000; 
+                isOverdue = true;
+            }
+
+            const updateTimer = () => {
+                const now = Date.now();
+                const diff = nextUpdateTime - now;
+
+                if (diff <= 0) {
+                    // Đã đến giờ! Tự động làm mới
+                    countdownElem.textContent = "Đang cập nhật...";
+                    clearInterval(telegramCountdownInterval);
+                    // Gọi hàm làm mới (forceRefresh = true)
+                    console.log("Auto-refreshing Telegram feed...");
+                    switchTelegramChannel(currentTelegramChannel, true);
+                } else {
+                    // Hiển thị đếm ngược
+                    const minutes = Math.floor(diff / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    
+                    if (isOverdue) {
+                        countdownElem.textContent = `⏳ Chờ tin mới: ${minutes}:${String(seconds).padStart(2, '0')}`;
+                        countdownElem.style.color = '#e67e22'; // Màu cam cảnh báo
+                    } else {
+                        countdownElem.textContent = `⏱️ Cập nhật sau: ${minutes}:${String(seconds).padStart(2, '0')}`;
+                        countdownElem.style.color = 'var(--danger-color)'; // Màu đỏ mặc định
+                    }
+                }
+            };
+
+            updateTimer(); // Chạy ngay lập tức 1 lần
+            telegramCountdownInterval = setInterval(updateTimer, 1000);
+        }
+
+        // --- CODE RIÊNG CHO KÊNH EVENTS (LMEvents) ---
+        async function loadLMEventsData() {
+            const container = document.getElementById('telegramFeedContent');
+            const channelId = 'LMEvents';
+            
+            try {
+                const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
+                const targetUrl = 'https://t.me/s/LMEvents';
+                // Thêm timestamp để tránh cache
+                const finalUrl = proxyUrl + encodeURIComponent(targetUrl) + '&tmp=' + Date.now();
+                
+                const response = await fetch(finalUrl);
+                if (!response.ok) throw new Error("Không thể kết nối đến Telegram.");
+                
+                const htmlText = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+                const allMessages = Array.from(doc.querySelectorAll('.tgme_widget_message'));
+                
+                if (allMessages.length === 0) {
+                    container.innerHTML = `<div style="text-align: center; padding: 20px;">Không tìm thấy bài đăng. <br><a href="https://t.me/${channelId}" target="_blank">Mở trực tiếp Telegram</a></div>`;
+                    return;
+                }
+
+                let feedHtml = '<div class="telegram-feed-container">';
+                const maxPosts = 20;
+                // Lấy 20 bài cuối cùng (mới nhất) và đảo ngược để bài mới nhất lên đầu
+                const messages = allMessages.slice(-maxPosts).reverse();
+                let latestPostLabel = '';
+                let latestPostTimeRaw = null; // Biến lưu thời gian gốc để đếm ngược
+                
+                for (let i = 0; i < messages.length; i++) {
+                    const msg = messages[i];
+                    const linkWrap = msg.querySelector('.tgme_widget_message_date');
+                    const postLink = linkWrap ? linkWrap.getAttribute('href') : `https://t.me/${channelId}`;
+                    const textDiv = msg.querySelector('.tgme_widget_message_text');
+                    let content = textDiv ? textDiv.innerHTML : '';
+                    
+                    const forwardDiv = msg.querySelector('.tgme_widget_message_forwarded_from_name');
+                    let forwardHtml = '';
+                    if (forwardDiv) forwardHtml = `<div class="telegram-forwarded">Chuyển tiếp từ: <strong>${forwardDiv.textContent}</strong></div>`;
+
+                    let mediaHtml = '';
+                    const groupedPhotos = msg.querySelectorAll('.tgme_widget_message_grouped_wrap .tgme_widget_message_photo_wrap');
+                    if (groupedPhotos.length > 0) {
+                        mediaHtml += '<div class="telegram-media-grid">';
+                        groupedPhotos.forEach(photo => {
+                            const style = photo.getAttribute('style');
+                            const match = style ? style.match(/url\('?(.*?)'?\)/) : null;
+                            if (match && match[1]) mediaHtml += `<div class="telegram-media-item" style="background-image: url('${match[1]}')" onclick="openImageZoom('${match[1]}')"></div>`;
+                        });
+                        mediaHtml += '</div>';
+                    } else {
+                        const singlePhoto = msg.querySelector('.tgme_widget_message_photo_wrap');
+                        if (singlePhoto) {
+                            const style = singlePhoto.getAttribute('style');
+                            const match = style ? style.match(/url\('?(.*?)'?\)/) : null;
+                            if (match && match[1]) mediaHtml += `<img src="${match[1]}" class="telegram-single-image" alt="Event Media" onclick="openImageZoom('${match[1]}')">`;
+                        }
+                        const videoWrap = msg.querySelector('.tgme_widget_message_video_player');
+                        if (videoWrap) {
+                            const thumbStyle = videoWrap.querySelector('i') ? videoWrap.querySelector('i').getAttribute('style') : '';
+                            const match = thumbStyle ? thumbStyle.match(/url\('?(.*?)'?\)/) : null;
+                            if (match && match[1]) {
+                                mediaHtml += `<a href="${postLink}" target="_blank" class="telegram-video-thumb"><img src="${match[1]}" alt="Video Thumbnail"><div class="telegram-video-icon">▶️</div></a>`;
+                            }
+                        }
+                    }
+
+                    const timeElem = msg.querySelector('.tgme_widget_message_date time');
+                    let timeStr = timeElem ? timeElem.textContent : '';
+                    
+                    // === THÊM MỚI: Lấy thời gian chính xác từ thuộc tính datetime ===
+                    if (timeElem && timeElem.getAttribute('datetime')) {
+                        const date = new Date(timeElem.getAttribute('datetime'));
+                        const hours = String(date.getHours()).padStart(2, '0');
+                        const minutes = String(date.getMinutes()).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        timeStr = `${hours}:${minutes} ${day}/${month}`;
+                        
+                        if (i === 0) {
+                            latestPostLabel = `Bài mới nhất: ${timeStr}`;
+                            latestPostTimeRaw = timeElem.getAttribute('datetime'); // Lưu thời gian gốc
+                        }
+                    }
+
+                    feedHtml += `
+                        <div class="telegram-post">
+                            <div class="telegram-post-header">
+                                <div class="telegram-avatar">LM</div>
+                                <div>
+                                    <div style="font-weight: bold; color: #3498db;">Lords Mobile Events</div>
+                                    <div class="telegram-meta">${timeStr}</div>
+                                </div>
+                            </div>
+                            <div class="telegram-content">${forwardHtml}${content}${mediaHtml}</div>
+                        </div>`;
+                }
+                feedHtml += '</div>';
+                feedHtml += `<div style="text-align: center; margin-top: 15px;"><a href="https://t.me/${channelId}" target="_blank" class="btn btn-primary">Xem thêm trên Telegram</a></div>`;
+                telegramCache[channelId] = { html: feedHtml, timestamp: Date.now(), latestLabel: latestPostLabel, latestPostTime: latestPostTimeRaw }; // Lưu cache đầy đủ
+                updateLastUpdateTimeDisplay(latestPostLabel || 'Đã cập nhật');
+                startTelegramCountdown(latestPostTimeRaw); // Bắt đầu đếm ngược
+                container.innerHTML = feedHtml;
+            } catch (error) {
+                updateLastUpdateTimeDisplay('Lỗi cập nhật');
+                container.innerHTML = `<div style="text-align: center; padding: 20px;"><p style="color: var(--danger-color);">⚠️ Lỗi tải dữ liệu: ${error.message}</p><a href="https://t.me/${channelId}" target="_blank" class="btn btn-primary">t.me/${channelId}</a></div>`;
+            }
+        }
+
+        // --- CODE RIÊNG CHO KÊNH NEWS (lmnews) ---
+        async function loadLMNewsData() {
+            const container = document.getElementById('telegramFeedContent');
+            const channelId = 'lmnews';
+            
+            try {
+                // === LOGIC MỚI: Tự động tải thêm trang cũ nếu chưa thấy mốc ===
+                let allMessages = [];
+                let nextBeforeId = null;
+                let foundMarker = false;
+                let loopCount = 0;
+                const maxLoops = 5; // Tải tối đa 5 trang để tìm mốc
+
+                while (!foundMarker && loopCount < maxLoops) {
+                    const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
+                    let targetUrl = 'https://t.me/s/lmnews';
+                    if (nextBeforeId) {
+                        targetUrl += `?before=${nextBeforeId}`;
+                    }
+                    
+                    const finalUrl = proxyUrl + encodeURIComponent(targetUrl) + '&tmp=' + Date.now();
+                    const response = await fetch(finalUrl);
+                    if (!response.ok) throw new Error("Không thể kết nối đến Telegram.");
+                    
+                    const htmlText = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, 'text/html');
+                    const pageMessages = Array.from(doc.querySelectorAll('.tgme_widget_message'));
+                    
+                    if (pageMessages.length === 0) break;
+
+                    // Đảo ngược để duyệt từ Mới nhất -> Cũ nhất trong trang này
+                    const reversedPageMessages = pageMessages.reverse();
+                    
+                    for (const msg of reversedPageMessages) {
+                        allMessages.push(msg); // Lưu vào danh sách tổng
+                        const textDiv = msg.querySelector('.tgme_widget_message_text');
+                        // Kiểm tra mốc
+                        if (textDiv && textDiv.textContent.toUpperCase().includes('24H CHALLENGE')) {
+                            foundMarker = true;
+                            break; 
+                        }
+                    }
+
+                    if (foundMarker) break;
+
+                    // Lấy ID của tin cũ nhất trang này để tải trang tiếp theo
+                    const oldestMsg = reversedPageMessages[reversedPageMessages.length - 1];
+                    const linkWrap = oldestMsg.querySelector('.tgme_widget_message_date');
+                    if (linkWrap) {
+                        const href = linkWrap.getAttribute('href');
+                        const match = href.match(/\/(\d+)$/);
+                        if (match) {
+                            nextBeforeId = match[1];
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                    
+                    loopCount++;
+                }
+
+                if (allMessages.length === 0) {
+                    container.innerHTML = `<div style="text-align: center; padding: 20px;">Không tìm thấy bài đăng. <br><a href="https://t.me/${channelId}" target="_blank">Mở trực tiếp Telegram</a></div>`;
+                    return;
+                }
+
+                const messages = allMessages; // Danh sách đã được lọc và sắp xếp Mới -> Cũ
+                let feedHtml = '<div class="telegram-feed-container">';
+
+                let latestPostLabel = '';
+                let latestPostTimeRaw = null;
+                
+                for (let i = 0; i < messages.length; i++) {
+                    const msg = messages[i];
+                    const linkWrap = msg.querySelector('.tgme_widget_message_date');
+                    const postLink = linkWrap ? linkWrap.getAttribute('href') : `https://t.me/${channelId}`;
+                    const textDiv = msg.querySelector('.tgme_widget_message_text');
+                    let content = textDiv ? textDiv.innerHTML : '';
+                    
+                    // Vẫn giữ logic forward nếu có
+                    const forwardDiv = msg.querySelector('.tgme_widget_message_forwarded_from_name');
+                    let forwardHtml = '';
+                    if (forwardDiv) forwardHtml = `<div class="telegram-forwarded">Chuyển tiếp từ: <strong>${forwardDiv.textContent}</strong></div>`;
+
+                    // Xử lý Media: Hỗ trợ cả Album nhiều ảnh và ảnh đơn
+                    let mediaHtml = '';
+                    
+                    // 1. Kiểm tra Album (nhiều ảnh)
+                    const groupedPhotos = msg.querySelectorAll('.tgme_widget_message_grouped_wrap .tgme_widget_message_photo_wrap');
+                    
+                    if (groupedPhotos.length > 0) {
+                        mediaHtml += '<div class="telegram-media-grid">';
+                        groupedPhotos.forEach(photo => {
+                            const style = photo.getAttribute('style');
+                            const match = style ? style.match(/url\('?(.*?)'?\)/) : null;
+                            if (match && match[1]) mediaHtml += `<div class="telegram-media-item" style="background-image: url('${match[1]}')" onclick="openImageZoom('${match[1]}')"></div>`;
+                        });
+                        mediaHtml += '</div>';
+                    } else {
+                        // 2. Kiểm tra ảnh đơn
+                        const singlePhoto = msg.querySelector('.tgme_widget_message_photo_wrap');
+                        if (singlePhoto) {
+                            const style = singlePhoto.getAttribute('style');
+                            const match = style ? style.match(/url\('?(.*?)'?\)/) : null;
+                            if (match && match[1]) mediaHtml += `<img src="${match[1]}" class="telegram-single-image" alt="News Image" onclick="openImageZoom('${match[1]}')">`;
+                        }
+                    }
+
+                    const timeElem = msg.querySelector('.tgme_widget_message_date time');
+                    let timeStr = timeElem ? timeElem.textContent : '';
+
+                    // === THÊM MỚI: Lấy thời gian chính xác từ thuộc tính datetime ===
+                    if (timeElem && timeElem.getAttribute('datetime')) {
+                        const date = new Date(timeElem.getAttribute('datetime'));
+                        const hours = String(date.getHours()).padStart(2, '0');
+                        const minutes = String(date.getMinutes()).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        timeStr = `${hours}:${minutes} ${day}/${month}`;
+                        
+                        if (i === 0) {
+                            latestPostLabel = `Bài mới nhất: ${timeStr}`;
+                            latestPostTimeRaw = timeElem.getAttribute('datetime');
+                        }
+                    }
+
+                    feedHtml += `
+                        <div class="telegram-post">
+                            <div class="telegram-post-header">
+                                <div class="telegram-avatar" style="background-color: #e67e22;">News</div>
+                                <div>
+                                    <div style="font-weight: bold; color: #e67e22;">Lords Mobile News</div>
+                                    <div class="telegram-meta">${timeStr}</div>
+                                </div>
+                            </div>
+                            <div class="telegram-content">${forwardHtml}${content}${mediaHtml}</div>
+                        </div>`;
+                }
+                feedHtml += '</div>';
+                feedHtml += `<div style="text-align: center; margin-top: 15px;"><a href="https://t.me/${channelId}" target="_blank" class="btn btn-primary">Xem thêm trên Telegram</a></div>`;
+                telegramCache[channelId] = { html: feedHtml, timestamp: Date.now(), latestLabel: latestPostLabel, latestPostTime: latestPostTimeRaw }; // Lưu cache đầy đủ
+                updateLastUpdateTimeDisplay(latestPostLabel || 'Đã cập nhật');
+                startTelegramCountdown(latestPostTimeRaw); // Bắt đầu đếm ngược
+                container.innerHTML = feedHtml;
+            } catch (error) {
+                updateLastUpdateTimeDisplay('Lỗi cập nhật');
+                container.innerHTML = `<div style="text-align: center; padding: 20px;"><p style="color: var(--danger-color);">⚠️ Lỗi tải dữ liệu: ${error.message}</p><a href="https://t.me/${channelId}" target="_blank" class="btn btn-primary">t.me/${channelId}</a></div>`;
+            }
+        }
+
+        // === THÊM MỚI: Logic Zoom Ảnh ===
+        function openImageZoom(src) {
+            const modal = document.getElementById('imageZoomModal');
+            const img = document.getElementById('zoomedImage');
+            img.src = src;
+            modal.classList.add('active');
+        }
+
+        function closeImageZoom() {
+            document.getElementById('imageZoomModal').classList.remove('active');
+        }
+
+        // === THÊM MỚI: Chức năng Thống kê Hell Event ===
+        function toggleHellStats() {
+            const panel = document.getElementById('hellStatsPanel');
+            if (panel.classList.contains('active')) {
+                panel.classList.remove('active');
+            } else {
+                analyzeHellStats();
+                panel.classList.add('active');
+            }
+        }
+
+        function analyzeHellStats() {
+            const posts = document.querySelectorAll('#telegramFeedContent .telegram-content');
+            if (posts.length === 0) {
+                document.getElementById('hellStatsPanel').innerHTML = '<p style="text-align:center; color: #666;">Chưa có dữ liệu để thống kê.</p>';
+                return;
+            }
+
+            // Định nghĩa từ khóa và tên tiếng Việt cho Hell
+            const hellMappings = [
+                { key: 'Labyrinth', name: 'Mê hồn trận' },
+                { key: 'Train Soldiers', name: 'Rèn luyện lính' },
+                { key: 'Research', name: 'Nghiên cứu' },
+                { key: 'Merge Pacts', name: 'Khế ước' },
+                { key: 'Building', name: 'Xây dựng' },
+                { key: 'Hunt Monsters', name: 'Săn quái vật' },
+                { key: 'Kingdom Tycoon', name: 'Xu may mắn' },
+                { key: 'Artifacts', name: 'Cổ Vật' },
+                { key: 'Forging', name: 'Forging' }
+            ];
+
+            // Định nghĩa cho Challenge (chỉ 2 loại như yêu cầu)
+            const challengeMappings = [
+                { key: 'Train Soldiers', name: 'Rèn luyện lính' },
+                { key: 'Research', name: 'Nghiên cứu' }
+            ];
+
+            // Danh sách các loại có hỗ trợ tính toán
+            const supportedCalcTypes = ['Train Soldiers', 'Merge Pacts', 'Labyrinth'];
+
+            let totalHellEvents = 0;
+            let totalChallenges = 0;
+            let hellStats = {};
+            let challengeStats = {};
+
+            // Khởi tạo object thống kê
+            hellMappings.forEach(m => hellStats[m.name] = { count: 0, points: [] });
+            challengeMappings.forEach(m => challengeStats[m.name] = { count: 0, points: [] });
+
+            posts.forEach(post => {
+                const text = post.textContent;
+                const upperText = text.toUpperCase();
+                
+                // === LOGIC MỚI: Tách biệt 24H Challenge ===
+                if (upperText.includes('24H CHALLENGE')) {
+                    let foundChallenge = false;
+                    challengeMappings.forEach(map => {
+                        if (text.includes(map.key)) {
+                            foundChallenge = true;
+                            challengeStats[map.name].count++;
+                            
+                            const regex = new RegExp(map.key + "[^0-9]*([0-9,]+)", "i");
+                            const match = text.match(regex);
+                            if (match && match[1]) {
+                                challengeStats[map.name].points.push(match[1]);
+                            }
+                        }
+                    });
+                    if (foundChallenge) totalChallenges++;
+                } else {
+                    // Xử lý Hell Event (nếu không phải Challenge)
+                    let foundInThisPost = false;
+                    hellMappings.forEach(map => {
+                        if (text.includes(map.key)) {
+                            foundInThisPost = true;
+                            hellStats[map.name].count++;
+                            
+                            const regex = new RegExp(map.key + "[^0-9]*([0-9,]+)", "i");
+                            const match = text.match(regex);
+                            if (match && match[1]) {
+                                hellStats[map.name].points.push(match[1]);
+                            }
+                        }
+                    });
+                    if (foundInThisPost) totalHellEvents++;
+                }
+            });
+
+            // Tạo HTML hiển thị
+            let html = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <h3 style="margin:0; color:var(--primary-color);">📊 Thống kê Sự kiện</h3>
+                            <span style="font-size:12px; color:#666;">(Dựa trên ${posts.length} bài viết)</span>
+                        </div>`;
+            
+            // Bảng Hell Event
+            html += `<h4 style="margin: 10px 0 5px; color: #e67e22;">🔥 Hell Events (${totalHellEvents})</h4>`;
+            html += `<table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Loại Hell</th>
+                                <th style="text-align:center;">Số lần</th>
+                                <th>Điểm yêu cầu (Gần nhất)</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+            
+            hellMappings.forEach(map => {
+                const data = hellStats[map.name];
+                if (data.count > 0) {
+                    // Lấy danh sách điểm (tối đa 3 cái gần nhất để hiển thị cho gọn)
+                    // === THAY ĐỔI: Biến điểm số thành nút bấm ===
+                    const isSupported = supportedCalcTypes.includes(map.key);
+                    const pointsHtml = data.points.length > 0 
+                        ? data.points.slice(0, 5).map(p => isSupported ? `<span class="clickable-point" onclick="autoFillAndCalc('${map.key}', '${p}')" title="Bấm để tính chi phí">${p}</span>` : p).join(', ') + (data.points.length > 5 ? '...' : '') 
+                        : 'N/A';
+                    
+                    // === THÊM MỚI: Nút tính tổng ===
+                    let sumButtonHtml = '';
+                    if (isSupported && data.points.length > 1) {
+                        const totalPoints = data.points.reduce((sum, p) => sum + parseInt(p.replace(/,/g, '')), 0);
+                        sumButtonHtml = ` <button style="padding: 2px 6px; font-size: 11px; margin-left: 5px; background-color: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="autoFillAndCalc('${map.key}', '${totalPoints.toLocaleString('en-US')}')" title="Tính tổng (${totalPoints.toLocaleString('en-US')})">Σ</button>`;
+                    }
+
+                    html += `<tr>
+                                <td><strong>${map.name}</strong></td>
+                                <td style="text-align:center; font-weight:bold;">${data.count}</td>
+                                <td style="font-size:12px; color:#555;">${pointsHtml}${sumButtonHtml}</td>
+                            </tr>`;
+                }
+            });
+            if (totalHellEvents === 0) html += `<tr><td colspan="3" style="text-align:center; font-style:italic;">Không tìm thấy Hell Event nào.</td></tr>`;
+            html += `</tbody></table>`;
+
+            // Bảng Challenge (nếu có)
+            if (totalChallenges > 0) {
+                html += `<h4 style="margin: 15px 0 5px; color: #9b59b6;">🏆 24H Challenge (${totalChallenges})</h4>`;
+                html += `<table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Loại Thử thách</th>
+                                    <th style="text-align:center;">Số lần</th>
+                                    <th>Điểm yêu cầu</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                
+                challengeMappings.forEach(map => {
+                    const data = challengeStats[map.name];
+                    if (data.count > 0) {
+                        // === THAY ĐỔI: Biến điểm số thành nút bấm ===
+                        const isSupported = supportedCalcTypes.includes(map.key);
+                        const pointsHtml = data.points.length > 0 
+                            ? data.points.slice(0, 5).map(p => isSupported ? `<span class="clickable-point" onclick="autoFillAndCalc('${map.key}', '${p}')" title="Bấm để tính chi phí">${p}</span>` : p).join(', ') + (data.points.length > 5 ? '...' : '') 
+                            : 'N/A';
+                        
+                        // === THÊM MỚI: Nút tính tổng ===
+                        let sumButtonHtml = '';
+                        if (isSupported && data.points.length > 1) {
+                            const totalPoints = data.points.reduce((sum, p) => sum + parseInt(p.replace(/,/g, '')), 0);
+                            sumButtonHtml = ` <button style="padding: 2px 6px; font-size: 11px; margin-left: 5px; background-color: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="autoFillAndCalc('${map.key}', '${totalPoints.toLocaleString('en-US')}')" title="Tính tổng (${totalPoints.toLocaleString('en-US')})">Σ</button>`;
+                        }
+
+                        html += `<tr>
+                                    <td><strong>${map.name}</strong></td>
+                                    <td style="text-align:center; font-weight:bold;">${data.count}</td>
+                                    <td style="font-size:12px; color:#555;">${pointsHtml}${sumButtonHtml}</td>
+                                </tr>`;
+                    }
+                });
+                html += `</tbody></table>`;
+            }
+            
+            html += `</tbody></table>`;
+            
+            // Thêm ghi chú
+            html += `<div style="margin-top:10px; font-size:11px; color:#888; font-style:italic;">
+                        * Thống kê dựa trên các bài viết đã tải về trong danh sách bên dưới.
+                     </div>`;
+
+            document.getElementById('hellStatsPanel').innerHTML = html;
+        }
+
+        // === THÊM MỚI: Hàm tự động điền và tính toán từ bảng thống kê ===
+        function autoFillAndCalc(hellKey, pointsStr) {
+            // Đóng modal Telegram để tránh che khuất modal tính toán
+            closeTelegramModal();
+            shouldReopenTelegramModal = true; // Đánh dấu để mở lại sau khi tính xong
+
+            // 1. Mở modal tính toán
+            showPointCalculatorModal();
+            
+            // 2. Chuyển sang tab Hell Event
+            switchUtilityTab('calc-hell');
+
+            // 3. Xử lý dữ liệu đầu vào
+            const cleanPoints = pointsStr.replace(/,/g, ''); // Xóa dấu phẩy
+            const targetInput = document.getElementById('hellPointsTarget');
+            targetInput.value = parseInt(cleanPoints).toLocaleString('en-US'); // Điền điểm
+
+            // 4. Mapping loại Hell từ Telegram sang value của select box
+            const typeMap = {
+                'Train Soldiers': 'troop',
+                'Merge Pacts': 'pact',
+                'Labyrinth': 'maze'
+            };
+
+            const calcType = typeMap[hellKey];
+            const selectBox = document.getElementById('hellEventType');
+
+            if (calcType) {
+                // Nếu là loại có hỗ trợ tính toán chi tiết
+                selectBox.value = calcType;
+                toggleHellOptions(); // Hiển thị các tùy chọn tương ứng (lính, khế...)
+                
+                // Tự động bấm nút tính toán
+                calculateHellEvent();
+                
+                // Cuộn xuống kết quả
+                document.getElementById('hellResults').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                // Nếu là loại chưa hỗ trợ (Building, Research...)
+                alert(`Hiện tại chưa có công thức tính chi tiết cho "${hellKey}".\nTuy nhiên tôi đã điền sẵn điểm mục tiêu (${pointsStr}) để bạn tham khảo.`);
+            }
         }
     </script>
 </body>
