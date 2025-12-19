@@ -2157,7 +2157,7 @@
             <div class="telegram-controls-wrapper">
                 <div class="telegram-tabs-group">
                     <button class="tab-btn active" onclick="switchTelegramChannel('LMEvents')" data-channel="LMEvents">Events</button>
-                    <button class="tab-btn" onclick="switchTelegramChannel('lmnews')" data-channel="lmnews">News</button>
+                    <button class="tab-btn" onclick="switchTelegramChannel('LmNewsEx')" data-channel="LmNewsEx">News</button>
                 </div>
                 <div class="telegram-actions-group">
                     <span id="telegramCountdown" style="font-size: 13px; font-weight: bold; color: var(--danger-color);"></span>
@@ -5025,7 +5025,7 @@
 
         // === THÊM MỚI: Logic lấy tin từ Telegram ===
         let currentTelegramChannel = 'LMEvents';
-        const telegramCache = { LMEvents: null, lmnews: null }; // Cache: { html: string, timestamp: number }
+        const telegramCache = { LMEvents: null, LmNewsEx: null }; // Cache: { html: string, timestamp: number }
         const CACHE_DURATION = 5 * 60 * 1000; // 5 phút (tính bằng mili giây)
         let telegramCountdownInterval = null; // Biến lưu interval đếm ngược
 
@@ -5249,10 +5249,10 @@
             }
         }
 
-        // --- CODE RIÊNG CHO KÊNH NEWS (lmnews) ---
+        // --- CODE RIÊNG CHO KÊNH NEWS (LmNewsEx) ---
         async function loadLMNewsData() {
             const container = document.getElementById('telegramFeedContent');
-            const channelId = 'lmnews';
+            const channelId = 'LmNewsEx';
             
             try {
                 // === LOGIC MỚI: Tự động tải thêm trang cũ nếu chưa thấy mốc ===
@@ -5264,7 +5264,7 @@
 
                 while (!foundMarker && loopCount < maxLoops) {
                     const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
-                    let targetUrl = 'https://t.me/s/lmnews';
+                    let targetUrl = 'https://t.me/s/LmNewsEx';
                     if (nextBeforeId) {
                         targetUrl += `?before=${nextBeforeId}`;
                     }
@@ -5287,7 +5287,8 @@
                         allMessages.push(msg); // Lưu vào danh sách tổng
                         const textDiv = msg.querySelector('.tgme_widget_message_text');
                         // Kiểm tra mốc
-                        if (textDiv && textDiv.textContent.toUpperCase().includes('24H CHALLENGE')) {
+                        const contentUpper = textDiv ? textDiv.textContent.toUpperCase() : '';
+                        if (contentUpper.includes('24H CHALLENGE') || contentUpper.includes('24-ЧАСОВОЕ ИСПЫТАНИЕ')) {
                             foundMarker = true;
                             break; 
                         }
@@ -5331,6 +5332,22 @@
                     const textDiv = msg.querySelector('.tgme_widget_message_text');
                     let content = textDiv ? textDiv.innerHTML : '';
                     
+                    // === THÊM MỚI: Dịch tiếng Nga sang tiếng Việt ===
+                    const ruMap = {
+                        '24-ЧАСОВОЕ ИСПЫТАНИЕ': 'THỬ THÁCH 24H',
+                        'Тренировка': 'Rèn Luyện Lính',
+                        'Сокровищница': 'Xu may mắn',
+                        'Стройка': 'Xây dựng',
+                        'Исследование': 'Nghiên cứu',
+                        'Пакты': 'Khế ước',
+                        'Охота': 'Săn quái vật',
+                        'Артефакты': 'Cổ vật',
+                        'Лабиринт': 'Mê Hồn Trận'
+                    };
+                    for (const [ru, vi] of Object.entries(ruMap)) {
+                        content = content.replace(new RegExp(ru, 'gi'), vi);
+                    }
+
                     // Vẫn giữ logic forward nếu có
                     const forwardDiv = msg.querySelector('.tgme_widget_message_forwarded_from_name');
                     let forwardHtml = '';
@@ -5435,24 +5452,44 @@
             // Định nghĩa từ khóa và tên tiếng Việt cho Hell
             const hellMappings = [
                 { key: 'Labyrinth', name: 'Mê hồn trận' },
+                { key: 'Лабиринт', name: 'Mê hồn trận' },
+                { key: 'Mê Hồn Trận', name: 'Mê hồn trận' },
                 { key: 'Train Soldiers', name: 'Rèn luyện lính' },
+                { key: 'Тренировка', name: 'Rèn luyện lính' },
+                { key: 'Rèn Luyện Lính', name: 'Rèn luyện lính' },
                 { key: 'Research', name: 'Nghiên cứu' },
+                { key: 'Исследование', name: 'Nghiên cứu' },
+                { key: 'Nghiên cứu', name: 'Nghiên cứu' },
                 { key: 'Merge Pacts', name: 'Khế ước' },
+                { key: 'Пакты', name: 'Khế ước' },
+                { key: 'Khế ước', name: 'Khế ước' },
                 { key: 'Building', name: 'Xây dựng' },
+                { key: 'Стройка', name: 'Xây dựng' },
+                { key: 'Xây dựng', name: 'Xây dựng' },
                 { key: 'Hunt Monsters', name: 'Săn quái vật' },
+                { key: 'Охота', name: 'Săn quái vật' },
+                { key: 'Săn quái vật', name: 'Săn quái vật' },
                 { key: 'Kingdom Tycoon', name: 'Xu may mắn' },
+                { key: 'Сокровищница', name: 'Xu may mắn' },
+                { key: 'Xu may mắn', name: 'Xu may mắn' },
                 { key: 'Artifacts', name: 'Cổ Vật' },
+                { key: 'Артефакты', name: 'Cổ Vật' },
+                { key: 'Cổ vật', name: 'Cổ Vật' },
                 { key: 'Forging', name: 'Forging' }
             ];
 
             // Định nghĩa cho Challenge (chỉ 2 loại như yêu cầu)
             const challengeMappings = [
                 { key: 'Train Soldiers', name: 'Rèn luyện lính' },
-                { key: 'Research', name: 'Nghiên cứu' }
+                { key: 'Тренировка', name: 'Rèn luyện lính' },
+                { key: 'Rèn Luyện Lính', name: 'Rèn luyện lính' },
+                { key: 'Research', name: 'Nghiên cứu' },
+                { key: 'Исследование', name: 'Nghiên cứu' },
+                { key: 'Nghiên cứu', name: 'Nghiên cứu' }
             ];
 
             // Danh sách các loại có hỗ trợ tính toán
-            const supportedCalcTypes = ['Train Soldiers', 'Merge Pacts', 'Labyrinth'];
+            const supportedCalcTypes = ['Train Soldiers', 'Merge Pacts', 'Labyrinth', 'Rèn Luyện Lính', 'Khế ước', 'Mê Hồn Trận'];
 
             let totalHellEvents = 0;
             let totalChallenges = 0;
@@ -5460,15 +5497,19 @@
             let challengeStats = {};
 
             // Khởi tạo object thống kê
-            hellMappings.forEach(m => hellStats[m.name] = { count: 0, points: [] });
-            challengeMappings.forEach(m => challengeStats[m.name] = { count: 0, points: [] });
+            hellMappings.forEach(m => {
+                if (!hellStats[m.name]) hellStats[m.name] = { count: 0, points: [] };
+            });
+            challengeMappings.forEach(m => {
+                if (!challengeStats[m.name]) challengeStats[m.name] = { count: 0, points: [] };
+            });
 
             posts.forEach(post => {
                 const text = post.textContent;
                 const upperText = text.toUpperCase();
                 
                 // === LOGIC MỚI: Tách biệt 24H Challenge ===
-                if (upperText.includes('24H CHALLENGE')) {
+                if (upperText.includes('24H CHALLENGE') || upperText.includes('24-ЧАСОВОЕ ИСПЫТАНИЕ') || upperText.includes('THỬ THÁCH 24H')) {
                     let foundChallenge = false;
                     challengeMappings.forEach(map => {
                         if (text.includes(map.key)) {
@@ -5521,25 +5562,33 @@
                         </thead>
                         <tbody>`;
             
-            hellMappings.forEach(map => {
-                const data = hellStats[map.name];
-                if (data.count > 0) {
+            // Lấy danh sách tên duy nhất để tránh lặp lại
+            const uniqueHellNames = [...new Set(hellMappings.map(m => m.name))];
+
+            uniqueHellNames.forEach(name => {
+                const data = hellStats[name];
+                if (data && data.count > 0) {
+                    // Tìm key tốt nhất để dùng cho tính toán (ưu tiên key có trong supportedCalcTypes)
+                    const bestMap = hellMappings.find(m => m.name === name && supportedCalcTypes.includes(m.key)) || 
+                                    hellMappings.find(m => m.name === name);
+                    const mapKey = bestMap ? bestMap.key : name;
+
                     // Lấy danh sách điểm (tối đa 3 cái gần nhất để hiển thị cho gọn)
                     // === THAY ĐỔI: Biến điểm số thành nút bấm ===
-                    const isSupported = supportedCalcTypes.includes(map.key);
+                    const isSupported = supportedCalcTypes.includes(mapKey);
                     const pointsHtml = data.points.length > 0 
-                        ? data.points.slice(0, 5).map(p => isSupported ? `<span class="clickable-point" onclick="autoFillAndCalc('${map.key}', '${p}')" title="Bấm để tính chi phí">${p}</span>` : p).join(', ') + (data.points.length > 5 ? '...' : '') 
+                        ? data.points.slice(0, 5).map(p => isSupported ? `<span class="clickable-point" onclick="autoFillAndCalc('${mapKey}', '${p}')" title="Bấm để tính chi phí">${p}</span>` : p).join(', ') + (data.points.length > 5 ? '...' : '') 
                         : 'N/A';
                     
                     // === THÊM MỚI: Nút tính tổng ===
                     let sumButtonHtml = '';
                     if (isSupported && data.points.length > 1) {
                         const totalPoints = data.points.reduce((sum, p) => sum + parseInt(p.replace(/,/g, '')), 0);
-                        sumButtonHtml = ` <button style="padding: 2px 6px; font-size: 11px; margin-left: 5px; background-color: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="autoFillAndCalc('${map.key}', '${totalPoints.toLocaleString('en-US')}')" title="Tính tổng (${totalPoints.toLocaleString('en-US')})">Σ</button>`;
+                        sumButtonHtml = ` <button style="padding: 2px 6px; font-size: 11px; margin-left: 5px; background-color: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="autoFillAndCalc('${mapKey}', '${totalPoints.toLocaleString('en-US')}')" title="Tính tổng (${totalPoints.toLocaleString('en-US')})">Σ</button>`;
                     }
 
                     html += `<tr>
-                                <td><strong>${map.name}</strong></td>
+                                <td><strong>${name}</strong></td>
                                 <td style="text-align:center; font-weight:bold;">${data.count}</td>
                                 <td style="font-size:12px; color:#555;">${pointsHtml}${sumButtonHtml}</td>
                             </tr>`;
@@ -5561,24 +5610,32 @@
                             </thead>
                             <tbody>`;
                 
-                challengeMappings.forEach(map => {
-                    const data = challengeStats[map.name];
-                    if (data.count > 0) {
+                // Lấy danh sách tên duy nhất cho Challenge
+                const uniqueChallengeNames = [...new Set(challengeMappings.map(m => m.name))];
+
+                uniqueChallengeNames.forEach(name => {
+                    const data = challengeStats[name];
+                    if (data && data.count > 0) {
+                        // Tìm key tốt nhất
+                        const bestMap = challengeMappings.find(m => m.name === name && supportedCalcTypes.includes(m.key)) || 
+                                        challengeMappings.find(m => m.name === name);
+                        const mapKey = bestMap ? bestMap.key : name;
+
                         // === THAY ĐỔI: Biến điểm số thành nút bấm ===
-                        const isSupported = supportedCalcTypes.includes(map.key);
+                        const isSupported = supportedCalcTypes.includes(mapKey);
                         const pointsHtml = data.points.length > 0 
-                            ? data.points.slice(0, 5).map(p => isSupported ? `<span class="clickable-point" onclick="autoFillAndCalc('${map.key}', '${p}')" title="Bấm để tính chi phí">${p}</span>` : p).join(', ') + (data.points.length > 5 ? '...' : '') 
+                            ? data.points.slice(0, 5).map(p => isSupported ? `<span class="clickable-point" onclick="autoFillAndCalc('${mapKey}', '${p}')" title="Bấm để tính chi phí">${p}</span>` : p).join(', ') + (data.points.length > 5 ? '...' : '') 
                             : 'N/A';
                         
                         // === THÊM MỚI: Nút tính tổng ===
                         let sumButtonHtml = '';
                         if (isSupported && data.points.length > 1) {
                             const totalPoints = data.points.reduce((sum, p) => sum + parseInt(p.replace(/,/g, '')), 0);
-                            sumButtonHtml = ` <button style="padding: 2px 6px; font-size: 11px; margin-left: 5px; background-color: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="autoFillAndCalc('${map.key}', '${totalPoints.toLocaleString('en-US')}')" title="Tính tổng (${totalPoints.toLocaleString('en-US')})">Σ</button>`;
+                            sumButtonHtml = ` <button style="padding: 2px 6px; font-size: 11px; margin-left: 5px; background-color: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="autoFillAndCalc('${mapKey}', '${totalPoints.toLocaleString('en-US')}')" title="Tính tổng (${totalPoints.toLocaleString('en-US')})">Σ</button>`;
                         }
 
                         html += `<tr>
-                                    <td><strong>${map.name}</strong></td>
+                                    <td><strong>${name}</strong></td>
                                     <td style="text-align:center; font-weight:bold;">${data.count}</td>
                                     <td style="font-size:12px; color:#555;">${pointsHtml}${sumButtonHtml}</td>
                                 </tr>`;
@@ -5618,7 +5675,10 @@
             const typeMap = {
                 'Train Soldiers': 'troop',
                 'Merge Pacts': 'pact',
-                'Labyrinth': 'maze'
+                'Labyrinth': 'maze',
+                'Rèn Luyện Lính': 'troop',
+                'Khế ước': 'pact',
+                'Mê Hồn Trận': 'maze'
             };
 
             const calcType = typeMap[hellKey];
