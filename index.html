@@ -5048,16 +5048,73 @@
             const nodes = [];
             let node;
             while (node = walker.nextNode()) {
-                if (/[а-яА-ЯёЁ]{2,}/.test(node.nodeValue)) nodes.push(node);
+                // Use closest to be more robust and prevent re-wrapping
+                if (/[а-яА-ЯёЁ]{2,}/.test(node.nodeValue) && !node.parentNode.closest('.translation-wrapper')) {
+                    nodes.push(node);
+                }
             }
             for (const n of nodes) {
+                if (!n.parentNode) continue;
                 const original = n.nodeValue;
-                const translated = await googleTranslateText(original);
-                if (translated !== original) {
-                    n.nodeValue = translated;
-                    if (n.parentElement) n.parentElement.title = `Gốc: ${original}`;
-                    if (n.parentElement) n.parentElement.style.backgroundColor = "#f0fff4";
-                }
+
+                // Create wrapper
+                const wrapper = document.createElement('span');
+                wrapper.className = 'translation-wrapper';
+                wrapper.style.backgroundColor = "#fff3e0"; // Light orange to indicate it's translatable
+                wrapper.style.borderRadius = "3px";
+                
+                // Span to hold the content. Initially, it's the original text.
+                const contentSpan = document.createElement('span');
+                contentSpan.className = 'translatable-content';
+                contentSpan.textContent = original;
+                contentSpan.dataset.original = original;
+                
+                // The button to trigger translation.
+                const translateBtn = document.createElement('span');
+                translateBtn.textContent = ' 🇻🇳'; // Icon to translate to Vietnamese
+                translateBtn.style.cursor = 'pointer';
+                translateBtn.style.fontSize = '12px';
+                translateBtn.style.opacity = '0.6';
+                translateBtn.title = 'Dịch sang tiếng Việt';
+                
+                translateBtn.onclick = async function(e) {
+                    e.stopPropagation();
+                    const content = this.previousElementSibling;
+                    const wrapper = this.parentElement;
+
+                    const isShowingTranslated = content.dataset.translated && content.textContent === content.dataset.translated;
+
+                    if (isShowingTranslated) {
+                        // Switch back to original
+                        content.textContent = content.dataset.original;
+                        this.textContent = ' 🇻🇳';
+                        this.title = 'Dịch sang tiếng Việt';
+                        wrapper.style.backgroundColor = "#fff3e0";
+                    } else {
+                        // Switch to translated
+                        if (content.dataset.translated) {
+                            content.textContent = content.dataset.translated;
+                            this.textContent = ' 🔄';
+                            this.title = 'Xem văn bản gốc';
+                            wrapper.style.backgroundColor = "#f0fff4";
+                        } else {
+                            // If not translated yet, call the API
+                            this.textContent = ' ⏳'; // Loading indicator
+                            this.title = 'Đang dịch...';
+                            const translatedText = await googleTranslateText(content.dataset.original);
+                            content.dataset.translated = translatedText;
+                            content.textContent = translatedText;
+                            this.textContent = ' 🔄';
+                            this.title = 'Xem văn bản gốc';
+                            wrapper.style.backgroundColor = "#f0fff4";
+                        }
+                    }
+                };
+                
+                wrapper.appendChild(contentSpan);
+                wrapper.appendChild(translateBtn);
+                
+                n.parentNode.replaceChild(wrapper, n);
             }
         }
 
@@ -5425,7 +5482,10 @@
                         'СТРАЖНИК' : 'Người Canh Gác',
                         'Змея' : 'Rồng',
                         'Троянского Коня' : 'Ngựa Thành Troy',
-                        'Рино' : 'Tê Giác'
+                        'Троянский Конь' : 'Ngựa Thành Troy',
+                        'Рино' : 'Tê Giác',
+                        'Шаман Вуду' : 'Thầy Tế',
+                        'Певица морей' : 'Ca Sĩ Biển Cả'
                     };
                     for (const [ru, vi] of Object.entries(ruMap)) {
                         content = content.replace(new RegExp(ru, 'gi'), vi);
